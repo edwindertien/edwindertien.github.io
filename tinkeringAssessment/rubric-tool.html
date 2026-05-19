@@ -28,6 +28,12 @@ html,body{height:100%;font-size:14px;font-family:-apple-system,BlinkMacSystemFon
 #sb-actions button{font-size:12px;padding:7px 4px;border:1px solid #ccc;background:#fff;border-radius:5px;cursor:pointer;text-align:center}
 #sb-actions button:hover{background:#f0f0f0}
 #sb-actions .full{grid-column:span 2}
+#btn-server{background:#e8f0fa;border-color:#aac4e8;color:#1a5fa8;font-weight:600}
+#btn-server:hover{background:#d4e5f7}
+#btn-server.loading{opacity:.6;pointer-events:none}
+#server-status{font-size:11px;padding:4px 10px;text-align:center;border-top:1px solid #eee;color:#888;display:none}
+#server-status.ok{color:#217a3c;background:#e6f5ec;display:block}
+#server-status.err{color:#c0392b;background:#fdecea;display:block}
 
 /* main */
 #main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
@@ -162,7 +168,9 @@ textarea.text-inp{resize:vertical;min-height:64px;line-height:1.5}
       <button onclick="duplicateCurrent()">⧉ Duplicate</button>
       <button onclick="saveSession()">↓ Save</button>
       <button onclick="loadSession()">↑ Load</button>
+      <button class="full" id="btn-server" onclick="loadServerRubric()">⇩ Load server rubric</button>
     </div>
+    <div id="server-status"></div>
   </div>
 
   <!-- ══ MAIN ══ -->
@@ -953,6 +961,44 @@ function loadSession(){
     }catch(e){ alert('Load error: '+e.message) }
   };
   inp.click();
+}
+
+// ═══════════════════════════════════════════════════════════
+//  LOAD RUBRIC FROM SERVER (same origin, relative path)
+// ═══════════════════════════════════════════════════════════
+// Change SERVER_RUBRIC_URL to match your hosted YAML filename.
+// A relative path works on any host (GitHub Pages, Netlify, etc.)
+const SERVER_RUBRIC_URL = 'rubric-mastering-tinkering.yaml';
+
+async function loadServerRubric(){
+  const btn = document.getElementById('btn-server');
+  const status = document.getElementById('server-status');
+  btn.classList.add('loading');
+  btn.textContent = '⇩ Fetching…';
+  status.className = '';
+  status.textContent = '';
+  try {
+    const res = await fetch(SERVER_RUBRIC_URL, {cache:'no-cache'});
+    if(!res.ok) throw new Error(`HTTP ${res.status} — ${res.statusText}`);
+    const text = await res.text();
+    const parsed = jsyaml.load(text);
+    if(!parsed?.sections) throw new Error('No "sections" key found in YAML');
+    rubric = parsed;
+    currentYaml = text;
+    renderAll();
+    autosave();
+    const ts = new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+    status.textContent = `✓ Loaded from server ${ts}`;
+    status.className = 'ok';
+    toast('Server rubric loaded & saved locally');
+  } catch(e) {
+    status.textContent = '✗ ' + e.message;
+    status.className = 'err';
+    toast('Failed to load server rubric');
+  } finally {
+    btn.classList.remove('loading');
+    btn.textContent = '⇩ Load server rubric';
+  }
 }
 
 // ═══════════════════════════════════════════════════════════
