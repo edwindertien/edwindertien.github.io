@@ -1,0 +1,245 @@
+# ══════════════════════════════════════════════════════════════════
+#  RUBRIC DEFINITION — Mastering Tinkering
+#  ──────────────────────────────────────────────────────────────────
+#  This YAML file is the single source of truth for the assessment
+#  form. Paste it into the tool via "Edit Rubric" to regenerate the
+#  entire interface. Share this file with colleagues to share rubrics.
+#
+#  FIELD TYPES
+#  ─────────────────────────────────────────────────────────────────
+#  slider      Numeric range.  min / max / step / points
+#  checkbox    Grid of independent checkboxes.
+#              items: list of labels   points_per_item: 1
+#  radio       Mutually exclusive options.
+#              points: list of {label, value}
+#  checklist   Two-column To-improve / Well-done panel.
+#              negative: [...]   positive: [...]
+#              points_per_positive: 1
+#  text        Single-line free-text note
+#  textarea    Multi-line free-text note
+# ══════════════════════════════════════════════════════════════════
+
+title: "Mastering Tinkering"
+course: "MT-2025"
+grading: true
+grade_decimals: 1
+
+sections:
+
+  - id: content
+    title: "content"
+    fields:
+
+      - id: tinkering_levels
+        label: "tinkering depth"
+        type: slider
+        min: 0
+        max: 5
+        step: 1
+        points: 5
+        description: "How many meaningfully distinct making approaches are visible?"
+
+      - id: materials_used
+        label: "range of materials & tools"
+        type: slider
+        min: 0
+        max: 4
+        step: 1
+        points: 4
+
+      - id: process_types
+        label: "process variety"
+        type: checkbox
+        points_per_item: 1
+        items:
+          - "cutting / shaping"
+          - "joining / assembling"
+          - "electronics / wiring"
+          - "digital fabrication"
+          - "soft materials"
+          - "found objects / repurposing"
+
+      - id: sufficient_scope
+        label: "sufficient scope & ambition"
+        type: checkbox
+        points_per_item: 1
+        items:
+          - "project is non-trivial in scale"
+          - "goes beyond a tutorial or recipe"
+          - "original concept, not a copy"
+
+      - id: additional_notes
+        label: "additional content notes"
+        type: text
+        placeholder: "e.g. very nice use of found materials…"
+
+  - id: exploration
+    title: "exploration & ideation"
+    fields:
+
+      - id: ideas_explored
+        label: "breadth of ideas explored"
+        type: slider
+        min: 0
+        max: 5
+        step: 1
+        points: 5
+
+      - id: sketching
+        label: "sketching & concept development"
+        type: checklist
+        points_per_positive: 1
+        negative:
+          - "no sketches or ideation visible"
+          - "single idea pursued without alternatives"
+          - "appears copied from example or tutorial"
+        positive:
+          - "multiple distinct directions explored"
+          - "sketches show evolution of thinking"
+          - "annotations explain reasoning"
+          - "references to inspirations or precedents"
+          - "surprising or unexpected concept"
+
+      - id: original_concept
+        label: "original concept"
+        type: text
+        placeholder: "Describe the core idea in your own words…"
+
+  - id: iteration
+    title: "iteration & prototyping"
+    fields:
+
+      - id: cycle_count
+        label: "number of meaningful iteration cycles"
+        type: slider
+        min: 0
+        max: 5
+        step: 1
+        points: 5
+
+      - id: iteration_quality
+        label: "iteration quality"
+        type: checklist
+        points_per_positive: 1
+        negative:
+          - "single attempt with no revision"
+          - "revisions are cosmetic only"
+          - "no evidence of testing"
+          - "problems noted but not addressed"
+        positive:
+          - "clear before/after visible in portfolio"
+          - "testing directly informed next step"
+          - "failure documented and learned from"
+          - "sought feedback from peers or teachers"
+          - "pivoted direction based on findings"
+
+      - id: prototype_note
+        label: "note on iteration"
+        type: text
+        placeholder: "e.g. tested three hinge mechanisms before settling on living hinge…"
+
+  - id: reflection
+    title: "reflection & sense-making"
+    fields:
+
+      - id: reflection_depth
+        label: "depth of reflection"
+        type: radio
+        points:
+          - label: "no reflection present"
+            value: 0
+          - label: "describes what was done (not learned)"
+            value: 1
+          - label: "some surface-level reflection"
+            value: 2
+          - label: "connects experience to genuine insight"
+            value: 3
+          - label: "rich, honest — reveals growth in thinking"
+            value: 4
+
+      - id: reflection_quality
+        label: "reflection observations"
+        type: checklist
+        points_per_positive: 1
+        negative:
+          - "no reflection visible in portfolio"
+          - "only describes successes"
+          - "very brief or formulaic"
+          - "passive voice — agency is unclear"
+        positive:
+          - "acknowledges failures openly"
+          - "articulates what was learned"
+          - "connects to broader interests or themes"
+          - "raises new questions for future work"
+          - "shows changed thinking across the project"
+
+      - id: reflection_quote
+        label: "memorable reflection moment"
+        type: textarea
+        placeholder: "Quote or paraphrase the most honest moment of reflection…"
+
+  - id: craft
+    title: "craft & making quality"
+    fields:
+
+      - id: execution_quality
+        label: "quality of execution"
+        type: slider
+        min: 0
+        max: 4
+        step: 1
+        points: 4
+
+      - id: craft_observations
+        label: "craft observations"
+        type: checklist
+        points_per_positive: 1
+        negative:
+          - "unfinished or abandoned"
+          - "not functional as intended"
+          - "structurally unsafe or fragile"
+          - "materials used carelessly"
+        positive:
+          - "complete and functional"
+          - "attention to finish and detail"
+          - "demonstrates new or difficult skill"
+          - "shows resourcefulness with constraints"
+          - "craft carries meaning — not just decoration"
+
+      - id: craft_note
+        label: "note on craft"
+        type: text
+        placeholder: "Specific observation about making quality…"
+
+  - id: sharing
+    title: "documentation & sharing"
+    fields:
+
+      - id: documentation_quality
+        label: "portfolio documentation quality"
+        type: slider
+        min: 0
+        max: 4
+        step: 1
+        points: 4
+
+      - id: documentation_obs
+        label: "documentation observations"
+        type: checklist
+        points_per_positive: 1
+        negative:
+          - "sparse — hard to follow the process"
+          - "images missing or poor quality"
+          - "only outcome shown, no process"
+          - "reads as an afterthought"
+        positive:
+          - "clear narrative arc through the project"
+          - "good quality images and/or video"
+          - "includes failures and pivots"
+          - "invites the reader into the process"
+          - "could inspire another maker"
+
+      - id: standout_note
+        label: "standout element"
+        type: textarea
+        placeholder: "Anything surprising, memorable, or worth highlighting…"

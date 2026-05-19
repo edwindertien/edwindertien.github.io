@@ -1,22 +1,21 @@
 # ══════════════════════════════════════════════════════════════════
-#  RUBRIC DEFINITION — Mastering Tinkering
+#  RUBRIC DEFINITION — Mastering Tinkering (Portfolio Assessment)
 #  ──────────────────────────────────────────────────────────────────
-#  This YAML file is the single source of truth for the assessment
-#  form. Paste it into the tool via "Edit Rubric" to regenerate the
-#  entire interface. Share this file with colleagues to share rubrics.
+#  Total points: 130
+#  EU grade: 1 + 9 × (earned / 130)
 #
-#  FIELD TYPES
-#  ─────────────────────────────────────────────────────────────────
-#  slider      Numeric range.  min / max / step / points
-#  checkbox    Grid of independent checkboxes.
-#              items: list of labels   points_per_item: 1
-#  radio       Mutually exclusive options.
-#              points: list of {label, value}
-#  checklist   Two-column To-improve / Well-done panel.
-#              negative: [...]   positive: [...]
-#              points_per_positive: 1
-#  text        Single-line free-text note
-#  textarea    Multi-line free-text note
+#  General aspects              10 pt   (2+2+1+2+3)
+#  Photo safari                 10 pt   (3+4+3)
+#  Building blocks              30 pt   (10+10+10)
+#  Material table               20 pt   (5+10+5+≈0 radio→handled+5)  [radio max=10]
+#  Scaffolding & facilitation   20 pt   (4+3+3 + 4+3+3)
+#  Design methods & reflection  20 pt   (2+2+6 + 5+3+2)
+#  Group assignment design      40 pt   (10+10+10+10)
+#
+#  NOTE ON CHECKLISTS: checklist fields with points_per_positive: 0
+#  are observation-only — they generate text in the output but do
+#  not contribute to the point score. Use them freely for notes.
+#  To make checklist items score points, set points_per_positive: 1.
 # ══════════════════════════════════════════════════════════════════
 
 title: "Mastering Tinkering"
@@ -26,220 +25,820 @@ grade_decimals: 1
 
 sections:
 
-  - id: content
-    title: "content"
+  # ════════════════════════════════════════════════════════════════
+  # 1. GENERAL ASPECTS  ·  10 pt total  (2 + 2 + 1 + 2 + 3)
+  # ════════════════════════════════════════════════════════════════
+  - id: general
+    title: "general aspects"
     fields:
 
-      - id: tinkering_levels
-        label: "tinkering depth"
+      - id: gen_structure
+        label: "portfolio structure (2 pt)"
         type: slider
         min: 0
-        max: 5
+        max: 2
         step: 1
-        points: 5
-        description: "How many meaningfully distinct making approaches are visible?"
+        points: 2
+        description: "Parts are easy to find; pages not too long."
 
-      - id: materials_used
-        label: "range of materials & tools"
+      - id: gen_structure_obs
+        label: "structure observations"
+        type: checklist
+        points_per_positive: 0
+        negative:
+          - "parts are hard to find or navigation is unclear"
+          - "pages too long / wall-of-text"
+          - "no clear table of contents or overview"
+        positive:
+          - "clear sections with logical order"
+          - "pages are well chunked and scannable"
+          - "navigation or index is provided"
+
+      - id: gen_language
+        label: "academic language level (2 pt)"
+        type: slider
+        min: 0
+        max: 2
+        step: 1
+        points: 2
+        description: "Complete sentences, no 'you'-forms, course terminology used correctly."
+
+      - id: gen_language_obs
+        label: "language observations"
+        type: checklist
+        points_per_positive: 0
+        negative:
+          - "informal or colloquial language used"
+          - "second-person ('you') forms present"
+          - "course terminology absent or misused"
+          - "incomplete sentences / bullet-only text"
+        positive:
+          - "academic register maintained throughout"
+          - "course concepts named and used correctly"
+          - "fluent, complete sentences throughout"
+
+      - id: gen_appearance
+        label: "visual appearance (1 pt)"
+        type: slider
+        min: 0
+        max: 1
+        step: 1
+        points: 1
+        description: "Layout is clear, consistent, and readable."
+
+      - id: gen_images
+        label: "meaningful images with captions and references (2 pt)"
+        type: slider
+        min: 0
+        max: 2
+        step: 1
+        points: 2
+        description: "No random illustrations; all images have captions and are referenced in the text."
+
+      - id: gen_images_obs
+        label: "image observations"
+        type: checklist
+        points_per_positive: 0
+        negative:
+          - "images present without caption"
+          - "decorative or irrelevant images used"
+          - "images not referenced in the running text"
+        positive:
+          - "every image has a descriptive caption"
+          - "images referenced where discussed"
+          - "images are relevant and add meaning"
+
+      - id: gen_references
+        label: "references — literature and internal cross-references (3 pt)"
+        type: slider
+        min: 0
+        max: 3
+        step: 1
+        points: 3
+        description: "References to both literature and other parts of the portfolio."
+
+      - id: gen_references_obs
+        label: "reference observations"
+        type: checklist
+        points_per_positive: 0
+        negative:
+          - "no literature references"
+          - "no internal cross-references between sections"
+          - "reference format inconsistent"
+        positive:
+          - "literature properly cited"
+          - "internal cross-references link relevant sections"
+          - "consistent reference format used throughout"
+
+      - id: gen_note
+        label: "general notes"
+        type: textarea
+        placeholder: "Overall quality of the portfolio as a document…"
+
+
+  # ════════════════════════════════════════════════════════════════
+  # 2. PHOTO SAFARI  ·  10 pt total  (3 + 4 + 3)
+  # ════════════════════════════════════════════════════════════════
+  - id: photo_safari
+    title: "photo safari"
+    fields:
+
+      - id: ps_variety
+        label: "variety of relevant hands-on elements (3 pt)"
+        type: slider
+        min: 0
+        max: 3
+        step: 1
+        points: 3
+        description: "Clear pictures with annotation; elements are genuinely hands-on and varied."
+
+      - id: ps_variety_obs
+        label: "variety observations"
+        type: checklist
+        points_per_positive: 0
+        negative:
+          - "few or repetitive elements"
+          - "images blurry or poorly framed"
+          - "elements not annotated"
+          - "elements not relevant to the course"
+        positive:
+          - "broad range of element types"
+          - "images are sharp and well-chosen"
+          - "annotations clarify what is shown"
+
+      - id: ps_concepts
+        label: "identification and use of course concepts (4 pt)"
         type: slider
         min: 0
         max: 4
         step: 1
         points: 4
+        description: "Concepts such as affordance, prototyping materials, tools, playground correctly identified and applied."
 
-      - id: process_types
-        label: "process variety"
-        type: checkbox
-        points_per_item: 1
-        items:
-          - "cutting / shaping"
-          - "joining / assembling"
-          - "electronics / wiring"
-          - "digital fabrication"
-          - "soft materials"
-          - "found objects / repurposing"
+      - id: ps_concepts_obs
+        label: "concept use observations"
+        type: checklist
+        points_per_positive: 0
+        negative:
+          - "course concepts not named or applied"
+          - "concepts used incorrectly"
+          - "description stays at surface level"
+        positive:
+          - "affordance correctly identified and described"
+          - "prototyping materials / tools discussed"
+          - "playground concept applied"
+          - "descriptions go beyond the obvious"
 
-      - id: sufficient_scope
-        label: "sufficient scope & ambition"
-        type: checkbox
-        points_per_item: 1
-        items:
-          - "project is non-trivial in scale"
-          - "goes beyond a tutorial or recipe"
-          - "original concept, not a copy"
-
-      - id: additional_notes
-        label: "additional content notes"
-        type: text
-        placeholder: "e.g. very nice use of found materials…"
-
-  - id: exploration
-    title: "exploration & ideation"
-    fields:
-
-      - id: ideas_explored
-        label: "breadth of ideas explored"
+      - id: ps_reflection
+        label: "reflection — link to designable improvements (3 pt)"
         type: slider
         min: 0
-        max: 5
+        max: 3
         step: 1
-        points: 5
+        points: 3
+        description: "Observed elements linked to things that could be designed for improvement."
 
-      - id: sketching
-        label: "sketching & concept development"
-        type: checklist
-        points_per_positive: 1
-        negative:
-          - "no sketches or ideation visible"
-          - "single idea pursued without alternatives"
-          - "appears copied from example or tutorial"
-        positive:
-          - "multiple distinct directions explored"
-          - "sketches show evolution of thinking"
-          - "annotations explain reasoning"
-          - "references to inspirations or precedents"
-          - "surprising or unexpected concept"
-
-      - id: original_concept
-        label: "original concept"
-        type: text
-        placeholder: "Describe the core idea in your own words…"
-
-  - id: iteration
-    title: "iteration & prototyping"
-    fields:
-
-      - id: cycle_count
-        label: "number of meaningful iteration cycles"
-        type: slider
-        min: 0
-        max: 5
-        step: 1
-        points: 5
-
-      - id: iteration_quality
-        label: "iteration quality"
-        type: checklist
-        points_per_positive: 1
-        negative:
-          - "single attempt with no revision"
-          - "revisions are cosmetic only"
-          - "no evidence of testing"
-          - "problems noted but not addressed"
-        positive:
-          - "clear before/after visible in portfolio"
-          - "testing directly informed next step"
-          - "failure documented and learned from"
-          - "sought feedback from peers or teachers"
-          - "pivoted direction based on findings"
-
-      - id: prototype_note
-        label: "note on iteration"
-        type: text
-        placeholder: "e.g. tested three hinge mechanisms before settling on living hinge…"
-
-  - id: reflection
-    title: "reflection & sense-making"
-    fields:
-
-      - id: reflection_depth
-        label: "depth of reflection"
-        type: radio
-        points:
-          - label: "no reflection present"
-            value: 0
-          - label: "describes what was done (not learned)"
-            value: 1
-          - label: "some surface-level reflection"
-            value: 2
-          - label: "connects experience to genuine insight"
-            value: 3
-          - label: "rich, honest — reveals growth in thinking"
-            value: 4
-
-      - id: reflection_quality
+      - id: ps_reflection_obs
         label: "reflection observations"
         type: checklist
-        points_per_positive: 1
+        points_per_positive: 0
         negative:
-          - "no reflection visible in portfolio"
-          - "only describes successes"
-          - "very brief or formulaic"
-          - "passive voice — agency is unclear"
+          - "no reflection on designable improvements"
+          - "reflection stays generic or superficial"
         positive:
-          - "acknowledges failures openly"
-          - "articulates what was learned"
-          - "connects to broader interests or themes"
-          - "raises new questions for future work"
-          - "shows changed thinking across the project"
+          - "specific elements linked to design opportunities"
+          - "argumentation for why redesign would help"
+          - "connects observations to course concepts"
 
-      - id: reflection_quote
-        label: "memorable reflection moment"
+      - id: ps_note
+        label: "photo safari notes"
         type: textarea
-        placeholder: "Quote or paraphrase the most honest moment of reflection…"
+        placeholder: "Notable observations about the photo safari section…"
 
-  - id: craft
-    title: "craft & making quality"
+
+  # ════════════════════════════════════════════════════════════════
+  # 3. BUILDING BLOCKS  ·  30 pt total  (10 + 10 + 10)
+  # ════════════════════════════════════════════════════════════════
+  - id: building_blocks
+    title: "building blocks"
     fields:
 
-      - id: execution_quality
-        label: "quality of execution"
+      - id: bb_sketches
+        label: "design process — series of sketches (10 pt)"
+        type: slider
+        min: 0
+        max: 10
+        step: 1
+        points: 10
+        description: "Clear storyline of what was explored — visual and language-supported."
+
+      - id: bb_sketches_obs
+        label: "sketches observations"
+        type: checklist
+        points_per_positive: 0
+        negative:
+          - "no or very few sketches"
+          - "sketches lack annotation or explanation"
+          - "no clear storyline of exploration"
+          - "process jumps straight to final result"
+        positive:
+          - "series of sketches shows progressive exploration"
+          - "language supports and explains the visuals"
+          - "alternatives and dead-ends are included"
+          - "clear narrative arc from question to outcome"
+
+      - id: bb_physical
+        label: "physical realisation (10 pt)"
+        type: slider
+        min: 0
+        max: 10
+        step: 1
+        points: 10
+        description: "Fabrication steps documented visually and in writing; failures and iterations shown."
+
+      - id: bb_physical_obs
+        label: "physical realisation observations"
+        type: checklist
+        points_per_positive: 0
+        negative:
+          - "fabrication steps not documented"
+          - "only final result shown — no process"
+          - "failures or problems not shown"
+          - "images without supporting explanation"
+        positive:
+          - "fabrication steps documented with images"
+          - "language accompanies each step"
+          - "failures shown honestly"
+          - "iteration between fabrication steps is visible"
+
+      - id: bb_iteration
+        label: "iteration with interoperability in mind (10 pt)"
+        type: slider
+        min: 0
+        max: 10
+        step: 1
+        points: 10
+        description: "Combinations with other building blocks explored; what structures are possible?"
+
+      - id: bb_iteration_obs
+        label: "iteration and interoperability observations"
+        type: checklist
+        points_per_positive: 0
+        negative:
+          - "no iteration beyond the first version"
+          - "interoperability with other blocks not considered"
+          - "possible combinations not explored"
+        positive:
+          - "multiple design iterations documented"
+          - "combination with other building blocks tested"
+          - "possible structures and combinations described"
+          - "design decisions informed by interoperability"
+
+      - id: bb_note
+        label: "building blocks notes"
+        type: textarea
+        placeholder: "Overall quality of building block documentation…"
+
+
+  # ════════════════════════════════════════════════════════════════
+  # 4. MATERIAL TABLE  ·  20 pt total  (5 + 10 + 5 + 5 = 25 possible, see note)
+  #    — properties 5 pt
+  #    — breadth of materials: radio (0 / 4 / 7 / 10 pt)
+  #    — qualitative ranking 5 pt
+  #    — critical properties 5 pt
+  #    (radio max = 10, so section max = 5+10+5+5 = 25;
+  #     the rubric says 20 pt — treat radio max of 10 as ceiling,
+  #     adjust radio to max 5 to hit 20, or keep 25 and note it.)
+  #    Decision: keep criteria as given (5+10+5+5 = 25 possible)
+  #    and note this in the comments. The EU formula will handle it.
+  # ════════════════════════════════════════════════════════════════
+  - id: material_table
+    title: "material table"
+    fields:
+
+      - id: mt_properties
+        label: "extended set of material properties (5 pt)"
+        type: slider
+        min: 0
+        max: 5
+        step: 1
+        points: 5
+        description: "Must include at least: preciousness, responsiveness, affordance, re-traceability."
+
+      - id: mt_properties_obs
+        label: "properties observations"
+        type: checklist
+        points_per_positive: 0
+        negative:
+          - "preciousness not discussed"
+          - "responsiveness not discussed"
+          - "affordance not discussed"
+          - "re-traceability not discussed"
+          - "properties list too narrow / copied from course"
+        positive:
+          - "preciousness addressed"
+          - "responsiveness addressed"
+          - "affordance addressed"
+          - "re-traceability addressed"
+          - "additional properties beyond the course list"
+
+      - id: mt_materials
+        label: "breadth of designed materials (5 pt)"
+        type: radio
+        description: "Only designed / engineered materials count — not raw materials such as paper or clay."
+        points:
+          - label: "fewer than 3 materials — insufficient"
+            value: 0
+          - label: "3 – 6 materials — minimum met"
+            value: 2
+          - label: "7 – 9 materials — good"
+            value: 4
+          - label: "10 or more materials — excellent"
+            value: 5
+
+      - id: mt_materials_obs
+        label: "materials selection observations"
+        type: checklist
+        points_per_positive: 0
+        negative:
+          - "raw / unprocessed materials included (paper, clay, etc.)"
+          - "materials not clearly designed / engineered"
+          - "materials overlap heavily with course examples"
+        positive:
+          - "materials are genuinely designed / engineered"
+          - "good variety across material families"
+          - "materials go meaningfully beyond course examples"
+
+      - id: mt_ranking
+        label: "qualitative ranking with contextual description (5 pt)"
+        type: slider
+        min: 0
+        max: 5
+        step: 1
+        points: 5
+        description: "Clear description of use context; NOT a –/0/+ symbol-table style ranking."
+
+      - id: mt_ranking_obs
+        label: "ranking observations"
+        type: checklist
+        points_per_positive: 0
+        negative:
+          - "ranking uses –/0/+ or similar symbol table"
+          - "use context not described"
+          - "ranking is not justified"
+        positive:
+          - "qualitative descriptions explain each material's niche"
+          - "ranking criteria explicitly stated"
+          - "use context is concrete and plausible"
+
+      - id: mt_critical
+        label: "critical properties — e.g. sustainability (5 pt)"
+        type: slider
+        min: 0
+        max: 5
+        step: 1
+        points: 5
+        description: "Different critical / sustainability dimensions considered and substantiated."
+
+      - id: mt_critical_obs
+        label: "critical properties observations"
+        type: checklist
+        points_per_positive: 0
+        negative:
+          - "sustainability not addressed at all"
+          - "only one critical dimension considered"
+          - "critique is superficial or generic"
+        positive:
+          - "multiple sustainability dimensions discussed"
+          - "environmental impact considered"
+          - "social or ethical dimensions considered"
+          - "critique is substantiated with evidence"
+
+      - id: mt_note
+        label: "material table notes"
+        type: textarea
+        placeholder: "Overall quality of the material table…"
+
+
+  # ════════════════════════════════════════════════════════════════
+  # 5. SCAFFOLDING & FACILITATION  ·  20 pt total
+  #    Part 1 — observations  (4 + 3 + 3 = 10 pt)
+  #    Part 2 — programming paradigm  (4 + 3 + 3 = 10 pt)
+  # ════════════════════════════════════════════════════════════════
+  - id: scaffolding
+    title: "scaffolding & facilitation"
+    fields:
+
+      # ── Part 1: observations ─────────────────────────────────
+      - id: sc_structure
+        label: "part 1 — structured observations, e.g. POEMS (4 pt)"
         type: slider
         min: 0
         max: 4
         step: 1
         points: 4
+        description: "POEMS framework or equivalent; structure makes observations comparable."
 
-      - id: craft_observations
-        label: "craft observations"
+      - id: sc_structure_obs
+        label: "structure observations"
         type: checklist
-        points_per_positive: 1
+        points_per_positive: 0
         negative:
-          - "unfinished or abandoned"
-          - "not functional as intended"
-          - "structurally unsafe or fragile"
-          - "materials used carelessly"
+          - "no framework or structure used"
+          - "observations are a random list"
+          - "POEMS or equivalent not applied"
         positive:
-          - "complete and functional"
-          - "attention to finish and detail"
-          - "demonstrates new or difficult skill"
-          - "shows resourcefulness with constraints"
-          - "craft carries meaning — not just decoration"
+          - "explicit framework named and applied"
+          - "categories are clearly separated"
+          - "structure makes observations easy to compare"
 
-      - id: craft_note
-        label: "note on craft"
+      - id: sc_detail
+        label: "part 1 — relevant level of detail (3 pt)"
+        type: slider
+        min: 0
+        max: 3
+        step: 1
+        points: 3
+        description: "Observations are transferable or generalisable — not too specific, not too vague."
+
+      - id: sc_detail_obs
+        label: "detail level observations"
+        type: checklist
+        points_per_positive: 0
+        negative:
+          - "observations too specific / anecdotal to generalise"
+          - "observations too vague to be useful"
+          - "no transferable insights identified"
+        positive:
+          - "observations at appropriate level of abstraction"
+          - "insights named as transferable or generalisable"
+          - "patterns across multiple observations identified"
+
+      - id: sc_reflect
+        label: "part 1 — reflection: well designed vs. could be better (3 pt)"
+        type: slider
+        min: 0
+        max: 3
+        step: 1
+        points: 3
+        description: "What was well designed and why? What could be designed better and why?"
+
+      - id: sc_reflect_obs
+        label: "design quality reflection observations"
+        type: checklist
+        points_per_positive: 0
+        negative:
+          - "no reflection on what was well designed"
+          - "no reflection on what could be improved"
+          - "reflection lacks 'why' reasoning"
+        positive:
+          - "specific examples of good design identified with reasoning"
+          - "specific improvements proposed with reasoning"
+          - "reflection connects to course concepts"
+
+      # ── Part 2: programming paradigm ─────────────────────────
+      - id: sc_paradigm_quality
+        label: "part 2 — interesting, relevant, physical, designed (4 pt)"
+        type: slider
+        min: 0
+        max: 4
+        step: 1
+        points: 4
+        description: "Is the paradigm example genuinely interesting, relevant, physically grounded, and designed?"
+
+      - id: sc_paradigm_obs
+        label: "paradigm quality observations"
+        type: checklist
+        points_per_positive: 0
+        negative:
+          - "example is trivial or uninteresting"
+          - "not physically grounded"
+          - "design dimension absent"
+          - "not relevant to programming concepts"
+        positive:
+          - "example is surprising or genuinely engaging"
+          - "physical / tangible grounding is clear"
+          - "design intent is articulated"
+          - "relevance to programming is explicit"
+
+      - id: sc_paradigm_steps
+        label: "part 2 — at least three design process steps documented (3 pt)"
+        type: slider
+        min: 0
+        max: 3
+        step: 1
+        points: 3
+        description: "3 pt — minimum three visible steps in the design process."
+
+      - id: sc_paradigm_reflection
+        label: "part 2 — reflection: insight in programming + interaction (3 pt)"
+        type: slider
+        min: 0
+        max: 3
+        step: 1
+        points: 3
+        description: "How does this material help gain insight in programming? What interaction possibilities exist?"
+
+      - id: sc_paradigm_reflection_obs
+        label: "paradigm reflection observations"
+        type: checklist
+        points_per_positive: 0
+        negative:
+          - "no reflection on programming insight"
+          - "interaction possibilities not discussed"
+          - "reflection is superficial"
+        positive:
+          - "concretely explains how material gives programming insight"
+          - "interaction possibilities described with examples"
+          - "connects physical experience to abstract programming concepts"
+
+      - id: sc_note
+        label: "scaffolding & facilitation notes"
+        type: textarea
+        placeholder: "Overall observations on both parts of scaffolding and facilitation…"
+
+
+  # ════════════════════════════════════════════════════════════════
+  # 6. DESIGN METHODS & REFLECTION  ·  20 pt total
+  #    Part 1 — methods comparison  (2 + 2 + 6 = 10 pt)
+  #    Part 2 — tinkering in context  (5 + 3 + 2 = 10 pt)
+  # ════════════════════════════════════════════════════════════════
+  - id: design_methods
+    title: "design methods & reflection"
+    fields:
+
+      # ── Part 1: design methods in comparison ─────────────────
+      - id: dm_definitions
+        label: "part 1 — good definitions of design methods (2 pt)"
+        type: slider
+        min: 0
+        max: 2
+        step: 1
+        points: 2
+        description: "Definitions well-grounded — found from sources or clearly formulated."
+
+      - id: dm_definitions_obs
+        label: "definition observations"
+        type: checklist
+        points_per_positive: 0
+        negative:
+          - "definitions missing"
+          - "definitions are vague or circular"
+          - "no sources used for definitions"
+        positive:
+          - "definitions are clear and precise"
+          - "sources cited for definitions"
+          - "own formulation shows genuine understanding"
+
+      - id: dm_comparison
+        label: "part 1 — relevant differences and similarities (2 pt)"
+        type: slider
+        min: 0
+        max: 2
+        step: 1
+        points: 2
+        description: "Non-obvious differences and meaningful similarities identified."
+
+      - id: dm_comparison_obs
+        label: "comparison observations"
+        type: checklist
+        points_per_positive: 0
+        negative:
+          - "comparison is superficial or only states the obvious"
+          - "differences and similarities not both addressed"
+          - "comparison lacks explicit criteria"
+        positive:
+          - "non-obvious differences identified"
+          - "meaningful similarities identified"
+          - "explicit comparison criteria stated"
+
+      - id: dm_graphic
+        label: "part 1 — understandable graphical overview (6 pt)"
+        type: slider
+        min: 0
+        max: 6
+        step: 1
+        points: 6
+        description: "Graphical comparison of methods; immediately comprehensible without the text."
+
+      - id: dm_graphic_obs
+        label: "graphical overview observations"
+        type: checklist
+        points_per_positive: 0
+        negative:
+          - "no graphical overview present"
+          - "graphic is hard to read or interpret"
+          - "graphic does not reflect the comparison"
+          - "axes or dimensions not labelled"
+        positive:
+          - "graphic is immediately understandable"
+          - "dimensions / axes clearly labelled"
+          - "positions of methods are justified"
+          - "graphic adds insight beyond the text"
+
+      # ── Part 2: tinkering in professional context ─────────────
+      - id: dm_contexts
+        label: "part 2 — at least three design areas / tasks (5 pt)"
+        type: slider
+        min: 0
+        max: 5
+        step: 1
+        points: 5
+        description: "Tinkering in own professional context or study domain; minimum three distinct areas."
+
+      - id: dm_contexts_obs
+        label: "design areas observations"
+        type: checklist
+        points_per_positive: 0
+        negative:
+          - "fewer than three design areas identified"
+          - "areas too similar / not meaningfully distinct"
+          - "areas not connected to student's own domain"
+        positive:
+          - "three or more distinct design areas"
+          - "areas clearly rooted in own domain"
+          - "each area described concretely"
+
+      - id: dm_tinkerable
+        label: "part 2 — how to make design tasks tinkerable, tech-mediated (3 pt)"
+        type: slider
+        min: 0
+        max: 3
+        step: 1
+        points: 3
+        description: "Concrete strategies for making design tasks tinkerable using technology."
+
+      - id: dm_tinkerable_obs
+        label: "tinkerable design observations"
+        type: checklist
+        points_per_positive: 0
+        negative:
+          - "no concrete proposals for making tasks tinkerable"
+          - "technology-mediated aspect not addressed"
+          - "proposals are generic / not specific to context"
+        positive:
+          - "concrete tinkerability strategies proposed"
+          - "technology role is explicit and plausible"
+          - "proposals fit the identified design areas"
+
+      - id: dm_argumentation
+        label: "part 2 — argumentation at course level (2 pt)"
+        type: slider
+        min: 0
+        max: 2
+        step: 1
+        points: 2
+        description: "Claims are supported by reasoning at the level of the course."
+
+      - id: dm_argumentation_obs
+        label: "argumentation observations"
+        type: checklist
+        points_per_positive: 0
+        negative:
+          - "argumentation absent"
+          - "claims made without reasoning"
+          - "course concepts not used in argumentation"
+        positive:
+          - "argumentation uses course concepts correctly"
+          - "claims supported with reasoning"
+          - "position clearly stated and defended"
+
+      - id: dm_note
+        label: "design methods notes"
+        type: textarea
+        placeholder: "Overall observations on the comparison and professional reflection…"
+
+
+  # ════════════════════════════════════════════════════════════════
+  # 7. GROUP ASSIGNMENT DESIGN  ·  40 pt total  (10+10+10+10)
+  # ════════════════════════════════════════════════════════════════
+  - id: group_assignment
+    title: "group assignment design"
+    fields:
+
+      # ── Concept ──────────────────────────────────────────────
+      - id: ga_concept
+        label: "concept (10 pt)"
+        type: slider
+        min: 0
+        max: 10
+        step: 1
+        points: 10
+        description: "Technical hurdle defined; kind of projects and purpose clear; visual conceptualisation process shown (not just final product)."
+
+      - id: ga_concept_obs
+        label: "concept observations"
+        type: checklist
+        points_per_positive: 0
+        negative:
+          - "technical hurdle not defined"
+          - "purpose or kind of projects not described"
+          - "only final product shown — no conceptualisation process"
+          - "visual development of concept absent"
+        positive:
+          - "technical hurdle clearly and specifically defined"
+          - "kind of projects and purpose well articulated"
+          - "visual conceptualisation process documented"
+          - "concept development goes through multiple stages"
+
+      - id: ga_concept_note
+        label: "concept notes"
         type: text
-        placeholder: "Specific observation about making quality…"
+        placeholder: "Observations on the concept quality…"
 
-  - id: sharing
-    title: "documentation & sharing"
-    fields:
-
-      - id: documentation_quality
-        label: "portfolio documentation quality"
+      # ── Material ──────────────────────────────────────────────
+      - id: ga_material
+        label: "material (10 pt)"
         type: slider
         min: 0
-        max: 4
+        max: 10
         step: 1
-        points: 4
+        points: 10
+        description: "What is designed vs. selected; evaluated using material table properties; explicit link to material table section."
 
-      - id: documentation_obs
-        label: "documentation observations"
+      - id: ga_material_obs
+        label: "material observations"
         type: checklist
-        points_per_positive: 1
+        points_per_positive: 0
         negative:
-          - "sparse — hard to follow the process"
-          - "images missing or poor quality"
-          - "only outcome shown, no process"
-          - "reads as an afterthought"
+          - "no distinction between designed and selected materials"
+          - "material table properties not used in evaluation"
+          - "no explicit cross-reference to the material table section"
+          - "material choices not justified"
         positive:
-          - "clear narrative arc through the project"
-          - "good quality images and/or video"
-          - "includes failures and pivots"
-          - "invites the reader into the process"
-          - "could inspire another maker"
+          - "clear distinction: what is designed vs. what is selected"
+          - "material table properties applied to evaluate choices"
+          - "explicit cross-reference to material table section"
+          - "material choices well argued"
 
-      - id: standout_note
-        label: "standout element"
+      - id: ga_material_note
+        label: "material notes"
+        type: text
+        placeholder: "Observations on material design and selection…"
+
+      # ── Scaffolding & facilitation ────────────────────────────
+      - id: ga_scaffolding
+        label: "scaffolding & facilitation (10 pt)"
+        type: slider
+        min: 0
+        max: 10
+        step: 1
+        points: 10
+        description: "Materials designed; onboarding strategy present; manual, card sets, or video tutorial."
+
+      - id: ga_scaffolding_obs
+        label: "scaffolding observations"
+        type: checklist
+        points_per_positive: 0
+        negative:
+          - "no onboarding strategy described"
+          - "no supporting materials (manual / cards / video)"
+          - "facilitation materials appear as afterthought"
+          - "no explanation of how participants are supported"
+        positive:
+          - "explicit onboarding strategy described"
+          - "manual, card set, or video tutorial present"
+          - "facilitation materials are purposefully designed"
+          - "scaffolding matches the technical hurdle"
+
+      - id: ga_scaffolding_note
+        label: "scaffolding notes"
+        type: text
+        placeholder: "Observations on the scaffolding and facilitation design…"
+
+      # ── Evaluation ────────────────────────────────────────────
+      - id: ga_evaluation
+        label: "evaluation (10 pt)"
+        type: slider
+        min: 0
+        max: 10
+        step: 1
+        points: 10
+        description: "Playground design and outcomes evaluated separately; systematic approach; results transferable and reproducible."
+
+      - id: ga_evaluation_obs
+        label: "evaluation observations"
+        type: checklist
+        points_per_positive: 0
+        negative:
+          - "playground design and outcomes not evaluated separately"
+          - "no systematic evaluation approach"
+          - "results not transferable or reproducible"
+          - "evaluation is purely anecdotal"
+          - "validity or limitations not discussed"
+        positive:
+          - "playground design evaluated as a separate object"
+          - "outcomes evaluated separately from the design"
+          - "systematic evaluation approach described"
+          - "transferability and reproducibility discussed"
+          - "validity or limitations addressed"
+
+      - id: ga_evaluation_note
+        label: "evaluation notes"
+        type: text
+        placeholder: "Observations on the evaluation approach and quality…"
+
+      - id: ga_overall_note
+        label: "overall group assignment notes"
         type: textarea
-        placeholder: "Anything surprising, memorable, or worth highlighting…"
+        placeholder: "Overall quality and coherence of the group assignment section…"
