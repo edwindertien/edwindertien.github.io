@@ -1,0 +1,981 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Rubric Tool</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/4.1.0/js-yaml.min.js"></script>
+<style>
+/* ── RESET & BASE ── */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;font-size:14px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;background:#f0f0f0;color:#1a1a1a}
+
+/* ── LAYOUT ── */
+#shell{display:flex;height:100vh;overflow:hidden}
+
+/* left sidebar */
+#sidebar{width:210px;min-width:210px;background:#fff;border-right:1px solid #ddd;display:flex;flex-direction:column;overflow:hidden}
+#sb-head{padding:12px 14px 8px;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#888;border-bottom:1px solid #eee}
+#sb-list{flex:1;overflow-y:auto}
+.sb-item{display:flex;align-items:center;padding:8px 14px;gap:4px;cursor:pointer;border-left:3px solid transparent}
+.sb-item:hover{background:#f5f5f5}
+.sb-item.active{background:#e8f0fa;border-left-color:#2060c0;color:#1a50a0}
+.sb-item .sb-name{flex:1;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sb-item input.rename-inp{flex:1;font-size:13px;border:none;outline:none;background:transparent;display:none}
+.icon-btn{background:none;border:none;cursor:pointer;padding:2px 3px;border-radius:3px;color:#aaa;font-size:13px;line-height:1;flex-shrink:0}
+.icon-btn:hover{color:#333;background:#eee}
+#sb-actions{padding:10px;border-top:1px solid #eee;display:grid;grid-template-columns:1fr 1fr;gap:6px}
+#sb-actions button{font-size:12px;padding:7px 4px;border:1px solid #ccc;background:#fff;border-radius:5px;cursor:pointer;text-align:center}
+#sb-actions button:hover{background:#f0f0f0}
+#sb-actions .full{grid-column:span 2}
+
+/* main */
+#main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
+
+/* topbar */
+#topbar{height:52px;background:#fff;border-bottom:1px solid #ddd;display:flex;align-items:center;padding:0 20px;gap:16px;flex-shrink:0}
+#tb-left{width:140px;flex-shrink:0}
+#tb-center{flex:1;text-align:center}
+#tb-title{font-size:15px;font-weight:700}
+#tb-sub{font-size:12px;color:#888;margin-top:1px}
+#tb-right{width:140px;display:flex;justify-content:flex-end;gap:8px;align-items:center}
+.grade-pill{font-size:13px;font-weight:700;padding:4px 12px;border-radius:20px;background:#e8f0fa;color:#1a50a0;display:none}
+.btn{font-size:12px;padding:6px 14px;border:1px solid #bbb;background:#fff;border-radius:5px;cursor:pointer;white-space:nowrap}
+.btn:hover{background:#f0f0f0}
+.btn.primary{background:#1a5fa8;color:#fff;border-color:#1a5fa8}
+.btn.primary:hover{background:#1550a0}
+
+/* content split */
+#content{flex:1;display:flex;overflow:hidden}
+#form-area{flex:1;overflow-y:auto;padding:20px 28px 40px}
+#sections-nav{width:190px;min-width:190px;background:#fff;border-left:1px solid #ddd;padding:14px 0;overflow-y:auto}
+#sections-nav h3{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#888;padding:0 16px 8px}
+.nav-link{display:block;padding:6px 16px;font-size:13px;color:#555;cursor:pointer;border-left:3px solid transparent;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.nav-link:hover{color:#1a1a1a;background:#f5f5f5}
+.nav-link.active{color:#1a5fa8;border-left-color:#1a5fa8;background:#e8f0fa;font-weight:500}
+
+/* ── META BAR ── */
+#meta-bar{background:#fff;border:1px solid #ddd;border-radius:6px;padding:12px 16px;margin-bottom:20px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+.meta-field label{display:block;font-size:11px;font-weight:600;color:#777;letter-spacing:.05em;text-transform:uppercase;margin-bottom:4px}
+.meta-field input{width:100%;padding:7px 10px;border:1px solid #ddd;border-radius:4px;font-size:13px;font-family:inherit}
+.meta-field input:focus{outline:none;border-color:#1a5fa8}
+
+/* ── SECTIONS ── */
+.form-section{margin-bottom:28px;scroll-margin-top:20px}
+.form-section>h2{font-size:20px;font-weight:700;padding-bottom:10px;border-bottom:2px solid #eee;margin-bottom:16px}
+
+/* ── FIELD BLOCK ── */
+.field-block{margin-bottom:18px}
+.field-label{font-size:13px;font-weight:700;margin-bottom:4px}
+.field-desc{font-size:12px;color:#888;margin-bottom:6px}
+
+/* slider */
+.slider-wrap{display:flex;align-items:center;gap:12px}
+.slider-wrap input[type=range]{flex:1;height:6px;-webkit-appearance:none;appearance:none;background:#ddd;border-radius:3px;outline:none;cursor:pointer}
+.slider-wrap input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:#1a5fa8;cursor:pointer}
+.slider-wrap input[type=range]::-moz-range-thumb{width:20px;height:20px;border:none;border-radius:50%;background:#1a5fa8;cursor:pointer}
+.slider-readout{font-size:13px;font-weight:700;min-width:48px;text-align:right;color:#1a5fa8}
+.slider-bounds{display:flex;justify-content:space-between;font-size:11px;color:#aaa;margin-top:2px;padding:0 0}
+
+/* checkbox grid */
+.checkbox-grid{display:flex;flex-wrap:wrap;gap:6px}
+.cb-item{display:flex;align-items:center;gap:6px;padding:5px 10px;border:1px solid #ddd;border-radius:4px;cursor:pointer;user-select:none}
+.cb-item:hover{background:#f5f5f5}
+.cb-item.checked{background:#e8f0fa;border-color:#1a5fa8}
+.cb-item input{accent-color:#1a5fa8;cursor:pointer}
+.cb-item label{font-size:13px;cursor:pointer}
+
+/* radio */
+.radio-list{display:flex;flex-direction:column;gap:5px}
+.radio-opt{display:flex;align-items:center;gap:8px;padding:7px 12px;border:1px solid #ddd;border-radius:4px;cursor:pointer;user-select:none}
+.radio-opt:hover{background:#f5f5f5}
+.radio-opt.selected{background:#e8f0fa;border-color:#1a5fa8}
+.radio-opt input{accent-color:#1a5fa8;cursor:pointer}
+.radio-opt label{flex:1;font-size:13px;cursor:pointer}
+.radio-pts{font-size:11px;color:#aaa}
+
+/* checklist two-column */
+.checklist-cols{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.cl-col{display:flex;flex-direction:column;gap:4px}
+.cl-head{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:4px 8px;border-radius:3px;margin-bottom:2px}
+.cl-head.neg{color:#c0392b;background:#fdecea}
+.cl-head.pos{color:#217a3c;background:#e6f5ec}
+.cl-check{display:flex;align-items:flex-start;gap:7px;padding:6px 9px;border:1px solid #ddd;border-radius:4px;cursor:pointer;user-select:none;line-height:1.35}
+.cl-check:hover{background:#f8f8f8}
+.cl-check.checked.neg{background:#fdecea;border-color:#e88}
+.cl-check.checked.pos{background:#e6f5ec;border-color:#6b6}
+.cl-check input{accent-color:#1a5fa8;cursor:pointer;flex-shrink:0;margin-top:2px}
+.cl-check label{font-size:12px;cursor:pointer}
+.cl-note{margin-top:4px}
+.cl-note input{width:100%;padding:6px 9px;border:1px solid #ddd;border-radius:4px;font-size:12px;font-family:inherit}
+.cl-note input:focus{outline:none;border-color:#1a5fa8}
+.cl-add{display:flex;gap:4px;margin-top:4px}
+.cl-add input{flex:1;padding:5px 9px;border:1px solid #ddd;border-radius:4px;font-size:12px;font-family:inherit;color:#aaa}
+.cl-add input:focus{outline:none;border-color:#1a5fa8;color:#1a1a1a}
+.cl-add button{padding:5px 10px;border:1px solid #bbb;background:#fff;border-radius:4px;font-size:12px;cursor:pointer}
+.cl-add button:hover{background:#f0f0f0}
+
+/* text / textarea */
+.text-inp{width:100%;padding:7px 10px;border:1px solid #ddd;border-radius:4px;font-size:13px;font-family:inherit}
+.text-inp:focus{outline:none;border-color:#1a5fa8}
+textarea.text-inp{resize:vertical;min-height:64px;line-height:1.5}
+
+/* ── OUTPUT ── */
+#output-wrap{background:#fff;border:1px solid #ddd;border-radius:6px;margin-top:4px}
+#output-head{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;border-bottom:1px solid #eee}
+#output-head h3{font-size:15px;font-weight:700}
+#output-btns{display:flex;gap:6px}
+#output-pre{font-family:'Cascadia Code','Fira Mono','Courier New',monospace;font-size:12px;line-height:1.65;white-space:pre-wrap;word-break:break-word;padding:14px 16px;max-height:380px;overflow-y:auto;color:#222;background:#fafafa;border-radius:0 0 6px 6px}
+
+/* ── EDITOR MODAL ── */
+#editor-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;align-items:center;justify-content:center}
+#editor-overlay.open{display:flex}
+#editor-box{background:#fff;border-radius:8px;width:min(860px,96vw);max-height:92vh;display:flex;flex-direction:column;box-shadow:0 12px 48px rgba(0,0,0,.22)}
+#editor-box header{display:flex;align-items:center;justify-content:space-between;padding:12px 18px;border-bottom:1px solid #eee}
+#editor-box header h2{font-size:15px;font-weight:700}
+#editor-hint{font-size:12px;color:#888;padding:8px 18px;border-bottom:1px solid #eee;background:#fffbe6}
+#editor-ta{flex:1;resize:none;border:none;outline:none;font-family:'Cascadia Code','Fira Mono','Courier New',monospace;font-size:12px;padding:14px 18px;min-height:440px;background:#fafaf8;color:#1a1a1a;overflow-y:auto}
+#editor-err{font-size:12px;color:#c0392b;padding:6px 18px;display:none}
+#editor-err.show{display:block}
+#editor-foot{display:flex;justify-content:flex-end;gap:8px;padding:10px 18px;border-top:1px solid #eee}
+
+/* ── TOAST ── */
+#toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1a1a1a;color:#fff;padding:8px 20px;border-radius:20px;font-size:13px;opacity:0;pointer-events:none;transition:opacity .2s;z-index:999}
+#toast.show{opacity:1}
+
+@media(max-width:680px){
+  #sidebar,#sections-nav{display:none}
+  #meta-bar{grid-template-columns:1fr}
+  .checklist-cols{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<div id="shell">
+
+  <!-- ══ LEFT SIDEBAR ══ -->
+  <div id="sidebar">
+    <div id="sb-head">Assessments</div>
+    <div id="sb-list"></div>
+    <div id="sb-actions">
+      <button class="full" onclick="newAssessment()">+ New</button>
+      <button onclick="duplicateCurrent()">⧉ Duplicate</button>
+      <button onclick="saveSession()">↓ Save</button>
+      <button onclick="loadSession()">↑ Load</button>
+    </div>
+  </div>
+
+  <!-- ══ MAIN ══ -->
+  <div id="main">
+
+    <!-- topbar -->
+    <div id="topbar">
+      <div id="tb-left">
+        <button class="btn" onclick="openEditor()">✎ Edit rubric</button>
+      </div>
+      <div id="tb-center">
+        <div id="tb-title">—</div>
+        <div id="tb-sub"></div>
+      </div>
+      <div id="tb-right">
+        <span id="grade-pill" class="grade-pill"></span>
+      </div>
+    </div>
+
+    <!-- form + sections nav -->
+    <div id="content">
+      <div id="form-area">
+
+        <!-- student meta -->
+        <div id="meta-bar">
+          <div class="meta-field">
+            <label>Student name</label>
+            <input id="m-student" placeholder="e.g. Mara de Vries" oninput="saveMeta();refreshOutput()"/>
+          </div>
+          <div class="meta-field">
+            <label>Project / submission</label>
+            <input id="m-project" placeholder="e.g. Paper Automaton v2" oninput="saveMeta();refreshOutput()"/>
+          </div>
+          <div class="meta-field">
+            <label>Assessor</label>
+            <input id="m-assessor" placeholder="Your name" oninput="saveMeta();refreshOutput()"/>
+          </div>
+        </div>
+
+        <div id="sections-form"></div>
+
+        <!-- generated output -->
+        <div id="output-wrap">
+          <div id="output-head">
+            <h3>Generated Assessment</h3>
+            <div id="output-btns">
+              <button class="btn" onclick="copyOutput()">Copy</button>
+              <button class="btn" onclick="downloadMd()">Download .md</button>
+            </div>
+          </div>
+          <pre id="output-pre"></pre>
+        </div>
+
+      </div>
+      <div id="sections-nav">
+        <h3>Sections</h3>
+        <div id="nav-links"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ EDITOR MODAL ══ -->
+<div id="editor-overlay">
+  <div id="editor-box">
+    <header>
+      <h2>Rubric definition (YAML)</h2>
+      <button class="icon-btn" style="font-size:18px" onclick="closeEditor()">✕</button>
+    </header>
+    <div id="editor-hint">
+      Paste your rubric YAML here and click <strong>Apply</strong> to regenerate the form.
+      Field types: <code>slider</code> · <code>checkbox</code> · <code>radio</code> · <code>checklist</code> · <code>text</code> · <code>textarea</code>
+    </div>
+    <textarea id="editor-ta" spellcheck="false"></textarea>
+    <div id="editor-err"></div>
+    <div id="editor-foot">
+      <button class="btn" onclick="closeEditor()">Cancel</button>
+      <button class="btn primary" onclick="applyRubric()">Apply rubric</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════════════════════
+//  DEFAULT RUBRIC YAML
+// ═══════════════════════════════════════════════════════════
+const DEFAULT_YAML = `title: "Mastering Tinkering"
+course: "MT-2025"
+grading: true
+grade_decimals: 1
+
+sections:
+
+  - id: content
+    title: "content"
+    fields:
+
+      - id: tinkering_depth
+        label: "tinkering depth"
+        type: slider
+        min: 0
+        max: 5
+        step: 1
+        points: 5
+        description: "How many meaningfully distinct making approaches are visible?"
+
+      - id: materials_used
+        label: "range of materials & tools"
+        type: slider
+        min: 0
+        max: 4
+        step: 1
+        points: 4
+
+      - id: process_types
+        label: "process variety"
+        type: checkbox
+        points_per_item: 1
+        items:
+          - "cutting / shaping"
+          - "joining / assembling"
+          - "electronics / wiring"
+          - "digital fabrication"
+          - "soft materials"
+          - "found objects / repurposing"
+
+      - id: sufficient_scope
+        label: "sufficient scope & ambition"
+        type: checkbox
+        points_per_item: 1
+        items:
+          - "project is non-trivial in scale"
+          - "goes beyond a tutorial or recipe"
+          - "original concept, not a copy"
+
+      - id: content_note
+        label: "additional content notes"
+        type: text
+        placeholder: "e.g. very nice use of found materials…"
+
+  - id: exploration
+    title: "exploration & ideation"
+    fields:
+
+      - id: ideas_explored
+        label: "breadth of ideas explored"
+        type: slider
+        min: 0
+        max: 5
+        step: 1
+        points: 5
+
+      - id: sketching
+        label: "sketching & concept development"
+        type: checklist
+        points_per_positive: 1
+        negative:
+          - "no sketches or ideation visible"
+          - "single idea pursued without alternatives"
+          - "appears copied from example or tutorial"
+        positive:
+          - "multiple distinct directions explored"
+          - "sketches show evolution of thinking"
+          - "annotations explain reasoning"
+          - "references to inspirations or precedents"
+          - "surprising or unexpected concept"
+
+      - id: original_concept
+        label: "original concept"
+        type: text
+        placeholder: "Describe the core idea in your own words…"
+
+  - id: iteration
+    title: "iteration & prototyping"
+    fields:
+
+      - id: cycle_count
+        label: "number of meaningful iteration cycles"
+        type: slider
+        min: 0
+        max: 5
+        step: 1
+        points: 5
+
+      - id: iteration_quality
+        label: "iteration quality"
+        type: checklist
+        points_per_positive: 1
+        negative:
+          - "single attempt with no revision"
+          - "revisions are cosmetic only"
+          - "no evidence of testing"
+          - "problems noted but not addressed"
+        positive:
+          - "clear before/after visible in portfolio"
+          - "testing directly informed next step"
+          - "failure documented and learned from"
+          - "sought feedback from peers or teachers"
+          - "pivoted direction based on findings"
+
+      - id: prototype_note
+        label: "note on iteration"
+        type: text
+        placeholder: "e.g. tested three hinge mechanisms before settling on living hinge…"
+
+  - id: reflection
+    title: "reflection & sense-making"
+    fields:
+
+      - id: reflection_depth
+        label: "depth of reflection"
+        type: radio
+        points:
+          - label: "no reflection present"
+            value: 0
+          - label: "describes what was done (not learned)"
+            value: 1
+          - label: "some surface-level reflection"
+            value: 2
+          - label: "connects experience to genuine insight"
+            value: 3
+          - label: "rich, honest — reveals growth in thinking"
+            value: 4
+
+      - id: reflection_quality
+        label: "reflection observations"
+        type: checklist
+        points_per_positive: 1
+        negative:
+          - "no reflection visible in portfolio"
+          - "only describes successes"
+          - "very brief or formulaic"
+          - "passive voice — agency is unclear"
+        positive:
+          - "acknowledges failures openly"
+          - "articulates what was learned"
+          - "connects to broader interests or themes"
+          - "raises new questions for future work"
+          - "shows changed thinking across the project"
+
+      - id: reflection_quote
+        label: "memorable reflection moment"
+        type: textarea
+        placeholder: "Quote or paraphrase the most honest moment of reflection…"
+
+  - id: craft
+    title: "craft & making quality"
+    fields:
+
+      - id: execution_quality
+        label: "quality of execution"
+        type: slider
+        min: 0
+        max: 4
+        step: 1
+        points: 4
+
+      - id: craft_observations
+        label: "craft observations"
+        type: checklist
+        points_per_positive: 1
+        negative:
+          - "unfinished or abandoned"
+          - "not functional as intended"
+          - "materials used carelessly"
+        positive:
+          - "complete and functional"
+          - "attention to finish and detail"
+          - "demonstrates new or difficult skill"
+          - "shows resourcefulness with constraints"
+          - "craft carries meaning — not just decoration"
+
+      - id: craft_note
+        label: "note on craft"
+        type: text
+        placeholder: "Specific observation about making quality…"
+
+  - id: sharing
+    title: "documentation & sharing"
+    fields:
+
+      - id: documentation_quality
+        label: "portfolio documentation quality"
+        type: slider
+        min: 0
+        max: 4
+        step: 1
+        points: 4
+
+      - id: documentation_obs
+        label: "documentation observations"
+        type: checklist
+        points_per_positive: 1
+        negative:
+          - "sparse — hard to follow the process"
+          - "images missing or poor quality"
+          - "only outcome shown, no process"
+          - "reads as an afterthought"
+        positive:
+          - "clear narrative arc through the project"
+          - "good quality images and/or video"
+          - "includes failures and pivots"
+          - "invites the reader into the process"
+          - "could inspire another maker"
+
+      - id: standout_note
+        label: "standout element"
+        type: textarea
+        placeholder: "Anything surprising, memorable, or worth highlighting…"
+`;
+
+// ═══════════════════════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════════════════════
+let rubric = null;
+let currentYaml = DEFAULT_YAML;
+let assessments = [];   // { id, name, meta:{student,project,assessor}, values:{} }
+let currentId = null;
+let _aid = 0;
+function mkId(){ return 'a'+(++_aid) }
+
+function cur(){ return assessments.find(a=>a.id===currentId) }
+
+// ═══════════════════════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════════════════════
+function init(){
+  // try to load from localStorage
+  try {
+    const saved = localStorage.getItem('rubric_session');
+    if(saved){
+      const data = JSON.parse(saved);
+      currentYaml = data.yaml || DEFAULT_YAML;
+      rubric = jsyaml.load(currentYaml);
+      assessments = data.assessments || [];
+      _aid = data.aid || 0;
+      currentId = data.currentId || assessments[0]?.id;
+    }
+  } catch(e){}
+  if(!rubric){ rubric = jsyaml.load(DEFAULT_YAML) }
+  if(assessments.length===0){ _newAssessment('Assessment 1') }
+  renderAll();
+}
+
+function _newAssessment(name){
+  const id = mkId();
+  assessments.push({id, name:name||'Assessment '+(assessments.length+1), meta:{student:'',project:'',assessor:''}, values:{}});
+  currentId = id;
+}
+
+function autosave(){
+  try {
+    localStorage.setItem('rubric_session', JSON.stringify({
+      yaml: currentYaml, assessments, aid:_aid, currentId
+    }));
+  } catch(e){}
+}
+
+// ═══════════════════════════════════════════════════════════
+//  SIDEBAR
+// ═══════════════════════════════════════════════════════════
+function renderSidebar(){
+  const list = document.getElementById('sb-list');
+  list.innerHTML = '';
+  assessments.forEach(a=>{
+    const d = document.createElement('div');
+    d.className = 'sb-item'+(a.id===currentId?' active':'');
+    d.innerHTML = `<span class="sb-name" title="${esc(a.name)}">${esc(a.name)}</span>
+      <input class="rename-inp" value="${esc(a.name)}"/>
+      <button class="icon-btn" title="Rename" onclick="event.stopPropagation();startRename('${a.id}',this)">✎</button>
+      <button class="icon-btn" title="Delete" onclick="event.stopPropagation();deleteAssessment('${a.id}')">✕</button>`;
+    d.querySelector('.sb-name').onclick = ()=>switchTo(a.id);
+    list.appendChild(d);
+  });
+}
+
+function startRename(id, btn){
+  const item = btn.closest('.sb-item');
+  const span = item.querySelector('.sb-name');
+  const inp  = item.querySelector('.rename-inp');
+  span.style.display='none'; inp.style.display='block'; inp.focus(); inp.select();
+  const done = ()=>{
+    const v = inp.value.trim()||span.textContent;
+    const a = assessments.find(x=>x.id===id);
+    if(a) a.name=v;
+    span.textContent=v; span.style.display=''; inp.style.display='none';
+    if(id===currentId) document.getElementById('tb-sub').textContent=v;
+    autosave(); renderSidebar();
+  };
+  inp.onblur=done; inp.onkeydown=e=>{ if(e.key==='Enter') inp.blur() };
+}
+
+function switchTo(id){
+  if(id===currentId) return;
+  currentId=id; renderAll(); autosave();
+}
+
+function newAssessment(){
+  _newAssessment(); renderAll(); autosave();
+}
+
+function duplicateCurrent(){
+  const src=cur(); if(!src) return;
+  const id=mkId();
+  assessments.push({id, name:src.name+' (copy)', meta:{...src.meta}, values:JSON.parse(JSON.stringify(src.values))});
+  currentId=id; renderAll(); autosave();
+}
+
+function deleteAssessment(id){
+  if(assessments.length===1&&!confirm('Delete the only assessment?')) return;
+  if(assessments.length>1&&!confirm('Delete this assessment?')) return;
+  assessments=assessments.filter(a=>a.id!==id);
+  if(currentId===id) currentId=assessments[0]?.id;
+  if(assessments.length===0) _newAssessment();
+  renderAll(); autosave();
+}
+
+// ═══════════════════════════════════════════════════════════
+//  TOPBAR + META
+// ═══════════════════════════════════════════════════════════
+function renderTopbar(){
+  const a=cur();
+  document.getElementById('tb-title').textContent = rubric?.title||'Rubric Tool';
+  document.getElementById('tb-sub').textContent   = a?.name||'';
+}
+
+function saveMeta(){
+  const a=cur(); if(!a) return;
+  a.meta.student  = document.getElementById('m-student').value;
+  a.meta.project  = document.getElementById('m-project').value;
+  a.meta.assessor = document.getElementById('m-assessor').value;
+  autosave();
+}
+
+function loadMeta(){
+  const a=cur();
+  document.getElementById('m-student').value  = a?.meta?.student||'';
+  document.getElementById('m-project').value  = a?.meta?.project||'';
+  document.getElementById('m-assessor').value = a?.meta?.assessor||'';
+}
+
+// ═══════════════════════════════════════════════════════════
+//  VALUE HELPERS
+// ═══════════════════════════════════════════════════════════
+function get(key, def){ return cur()?.values?.[key]??def }
+function set(key,val){ const a=cur(); if(a){ a.values[key]=val; } refreshOutput(); autosave(); }
+
+// ═══════════════════════════════════════════════════════════
+//  FORM RENDER
+// ═══════════════════════════════════════════════════════════
+function renderForm(){
+  const form = document.getElementById('sections-form');
+  const nav  = document.getElementById('nav-links');
+  form.innerHTML=''; nav.innerHTML='';
+  if(!rubric) return;
+
+  rubric.sections.forEach((sec,si)=>{
+    // section element
+    const secEl = document.createElement('div');
+    secEl.className='form-section'; secEl.id='sec-'+sec.id;
+    secEl.innerHTML='<h2>'+esc(sec.title)+'</h2>';
+    sec.fields.forEach(f=>{ secEl.appendChild(buildField(f)) });
+    form.appendChild(secEl);
+
+    // nav link
+    const lnk = document.createElement('div');
+    lnk.className='nav-link'+(si===0?' active':'');
+    lnk.textContent=sec.title;
+    lnk.onclick=()=>{
+      document.getElementById('sec-'+sec.id)?.scrollIntoView({behavior:'smooth',block:'start'});
+    };
+    nav.appendChild(lnk);
+  });
+
+  // scroll spy
+  const fa=document.getElementById('form-area');
+  fa.onscroll=()=>{
+    const links=nav.querySelectorAll('.nav-link');
+    rubric.sections.forEach((sec,i)=>{
+      const el=document.getElementById('sec-'+sec.id);
+      if(!el) return;
+      const rect=el.getBoundingClientRect();
+      if(rect.top<160&&rect.bottom>0){
+        links.forEach(l=>l.classList.remove('active'));
+        links[i]?.classList.add('active');
+      }
+    });
+  };
+}
+
+function buildField(f){
+  const wrap=document.createElement('div');
+  wrap.className='field-block';
+  let html=`<div class="field-label">${esc(f.label)}</div>`;
+  if(f.description) html+=`<div class="field-desc">${esc(f.description)}</div>`;
+
+  if(f.type==='slider'){
+    const v=get(f.id,f.min??0);
+    const max=f.points??f.max??0;
+    html+=`<div class="slider-wrap">
+      <input type="range" id="sl-${f.id}" min="${f.min??0}" max="${f.max??10}" step="${f.step??1}" value="${v}"/>
+      <span class="slider-readout" id="sr-${f.id}">${v} / ${max}</span>
+    </div><div class="slider-bounds"><span>${f.min??0}</span><span>${f.max??10}</span></div>`;
+  }
+  else if(f.type==='checkbox'){
+    const items=(f.items||[]);
+    html+='<div class="checkbox-grid">';
+    items.forEach((lbl,i)=>{
+      const key=f.id+'_'+i; const chk=get(key,false);
+      html+=`<div class="cb-item${chk?' checked':''}" id="cbi-${key}" onclick="toggleCb('${f.id}',${i},this)">
+        <input type="checkbox" id="cb-${key}" ${chk?'checked':''}/>
+        <label for="cb-${key}">${esc(lbl)}</label></div>`;
+    });
+    html+='</div>';
+  }
+  else if(f.type==='radio'){
+    const cur_v=get(f.id,null);
+    html+='<div class="radio-list" id="rl-'+f.id+'">';
+    (f.points||[]).forEach((opt,i)=>{
+      const sel=cur_v===opt.value;
+      html+=`<div class="radio-opt${sel?' selected':''}" onclick="pickRadio('${f.id}',${opt.value},this.closest('.radio-list'))">
+        <input type="radio" name="r-${f.id}" value="${opt.value}" ${sel?'checked':''}/>
+        <label>${esc(opt.label)}</label>
+        <span class="radio-pts">${opt.value} pt${opt.value!==1?'s':''}</span></div>`;
+    });
+    html+='</div>';
+  }
+  else if(f.type==='checklist'){
+    const neg=f.negative||[]; const pos=f.positive||[];
+    const negNote=get(f.id+'__neg_note','');
+    const posNote=get(f.id+'__pos_note','');
+    html+='<div class="checklist-cols"><div class="cl-col">';
+    html+='<div class="cl-head neg">To improve</div>';
+    neg.forEach((t,i)=>{
+      const k=f.id+'__neg__'+i; const chk=get(k,false);
+      html+=`<div class="cl-check neg${chk?' checked':''}" id="clc-${k}" onclick="toggleCl('${f.id}','neg',${i},this)">
+        <input type="checkbox" ${chk?'checked':''}/><label>– ${esc(t)}</label></div>`;
+    });
+    html+=`<div class="cl-note"><input class="text-inp" id="cln-neg-${f.id}" placeholder="Add note…" value="${esc(negNote)}"
+      oninput="set('${f.id}__neg_note',this.value)"/></div>`;
+    html+=`<div class="cl-add"><input id="cla-neg-${f.id}" placeholder="Add negative point…"/>
+      <button onclick="addClItem('${f.id}','neg')">Add</button></div>`;
+    html+='</div><div class="cl-col">';
+    html+='<div class="cl-head pos">Well done</div>';
+    pos.forEach((t,i)=>{
+      const k=f.id+'__pos__'+i; const chk=get(k,false);
+      html+=`<div class="cl-check pos${chk?' checked':''}" id="clc-${k}" onclick="toggleCl('${f.id}','pos',${i},this)">
+        <input type="checkbox" ${chk?'checked':''}/><label>+ ${esc(t)}</label></div>`;
+    });
+    html+=`<div class="cl-note"><input class="text-inp" id="cln-pos-${f.id}" placeholder="Add note…" value="${esc(posNote)}"
+      oninput="set('${f.id}__pos_note',this.value)"/></div>`;
+    html+=`<div class="cl-add"><input id="cla-pos-${f.id}" placeholder="Add positive point…"/>
+      <button onclick="addClItem('${f.id}','pos')">Add</button></div>`;
+    html+='</div></div>';
+  }
+  else if(f.type==='textarea'){
+    const v=get(f.id,'');
+    html+=`<textarea class="text-inp" id="ti-${f.id}" placeholder="${esc(f.placeholder||'')}"
+      oninput="set('${f.id}',this.value)">${esc(v)}</textarea>`;
+  }
+  else { // text
+    const v=get(f.id,'');
+    html+=`<input class="text-inp" id="ti-${f.id}" placeholder="${esc(f.placeholder||'')}"
+      value="${esc(v)}" oninput="set('${f.id}',this.value)"/>`;
+  }
+
+  wrap.innerHTML=html;
+  // attach slider event (needs DOM node)
+  if(f.type==='slider'){
+    const sl=wrap.querySelector('input[type=range]');
+    const sr=wrap.querySelector('.slider-readout');
+    const max=f.points??f.max??0;
+    sl.addEventListener('input',()=>{
+      const v=parseInt(sl.value);
+      sr.textContent=v+' / '+max;
+      set(f.id,v);
+    });
+  }
+  return wrap;
+}
+
+// ═══════════════════════════════════════════════════════════
+//  FIELD INTERACTION
+// ═══════════════════════════════════════════════════════════
+function toggleCb(fid,idx,el){
+  const k=fid+'_'+idx; const now=!get(k,false);
+  set(k,now);
+  el.classList.toggle('checked',now);
+  el.querySelector('input').checked=now;
+}
+
+function pickRadio(fid,val,list){
+  set(fid,val);
+  list.querySelectorAll('.radio-opt').forEach(o=>{
+    const isMe=parseFloat(o.querySelector('input').value)===val;
+    o.classList.toggle('selected',isMe);
+    o.querySelector('input').checked=isMe;
+  });
+}
+
+function toggleCl(fid,side,idx,el){
+  const k=fid+'__'+side+'__'+idx; const now=!get(k,false);
+  set(k,now);
+  el.classList.toggle('checked',now);
+  el.querySelector('input').checked=now;
+}
+
+function addClItem(fid,side){
+  const inp=document.getElementById('cla-'+side+'-'+fid);
+  const txt=inp.value.trim(); if(!txt) return; inp.value='';
+  // add to rubric definition
+  for(const sec of rubric.sections){
+    const f=sec.fields.find(x=>x.id===fid); if(!f) continue;
+    const arr=side==='neg'?(f.negative||(f.negative=[])):(f.positive||(f.positive=[]));
+    const idx=arr.length; arr.push(txt);
+    // insert DOM node before add-row
+    const col=inp.closest('.cl-col');
+    const addRow=inp.closest('.cl-add');
+    const div=document.createElement('div');
+    const k=fid+'__'+side+'__'+idx;
+    div.className='cl-check '+side;
+    div.id='clc-'+k;
+    div.onclick=function(){ toggleCl(fid,side,idx,this) };
+    div.innerHTML=`<input type="checkbox"/><label>${side==='neg'?'– ':'+ '}${esc(txt)}</label>`;
+    col.insertBefore(div,addRow);
+    break;
+  }
+  refreshOutput(); autosave();
+}
+
+// ═══════════════════════════════════════════════════════════
+//  OUTPUT
+// ═══════════════════════════════════════════════════════════
+function computePoints(){
+  let earned=0,max=0;
+  if(!rubric) return {earned,max};
+  for(const sec of rubric.sections){
+    for(const f of sec.fields){
+      if(f.type==='slider'){
+        const v=get(f.id,f.min??0);
+        const pts=f.points??f.max??0;
+        earned+=Number(v); max+=pts;
+      }else if(f.type==='checkbox'){
+        const ppi=f.points_per_item??1;
+        (f.items||[]).forEach((_,i)=>{ if(get(f.id+'_'+i,false)){ earned+=ppi } });
+        max+=(f.items||[]).length*ppi;
+      }else if(f.type==='radio'){
+        const v=get(f.id,null);
+        const maxV=Math.max(...(f.points||[]).map(p=>p.value),0);
+        if(v!==null) earned+=Number(v);
+        max+=maxV;
+      }else if(f.type==='checklist'){
+        const ppp=f.points_per_positive??1;
+        (f.positive||[]).forEach((_,i)=>{ if(get(f.id+'__pos__'+i,false)) earned+=ppp });
+        max+=(f.positive||[]).length*ppp;
+      }
+    }
+  }
+  return {earned,max};
+}
+
+function refreshOutput(){
+  const a=cur(); if(!a||!rubric) return;
+  const lines=[];
+  const date=new Date().toLocaleDateString('nl-NL');
+
+  lines.push('# '+rubric.title+(rubric.course?' ('+rubric.course+')':''));
+  if(a.meta.student) lines.push('Student: '+a.meta.student);
+  if(a.meta.project) lines.push('Project: '+a.meta.project);
+  if(a.meta.assessor) lines.push('Assessor: '+a.meta.assessor);
+  lines.push('Date: '+date);
+
+  for(const sec of rubric.sections){
+    lines.push(''); lines.push('# '+sec.title);
+    for(const f of sec.fields){
+      if(f.type==='slider'){
+        const v=get(f.id,f.min??0);
+        const max=f.points??f.max??0;
+        lines.push(f.label+': '+v+' / '+max);
+      }else if(f.type==='checkbox'){
+        const checked=(f.items||[]).filter((_,i)=>get(f.id+'_'+i,false));
+        if(checked.length) lines.push(f.label+': '+checked.join(', '));
+      }else if(f.type==='radio'){
+        const v=get(f.id,null);
+        if(v!==null){
+          const opt=(f.points||[]).find(p=>p.value===v);
+          lines.push(f.label+': '+( opt?.label||v ));
+        }
+      }else if(f.type==='checklist'){
+        const posChecked=(f.positive||[]).filter((_,i)=>get(f.id+'__pos__'+i,false));
+        const negChecked=(f.negative||[]).filter((_,i)=>get(f.id+'__neg__'+i,false));
+        if(posChecked.length||negChecked.length){
+          lines.push(f.label+':');
+          posChecked.forEach(t=>lines.push('  + '+t));
+          negChecked.forEach(t=>lines.push('  – '+t));
+        }
+        const negNote=get(f.id+'__neg_note',''); const posNote=get(f.id+'__pos_note','');
+        if(negNote) lines.push('  Note: '+negNote);
+        if(posNote) lines.push('  Note: '+posNote);
+      }else if(f.type==='text'||f.type==='textarea'){
+        const v=get(f.id,''); if(v) lines.push(f.label+': '+v);
+      }
+    }
+  }
+
+  const {earned,max}=computePoints();
+  if(rubric.grading&&max>0){
+    const dec=rubric.grade_decimals??1;
+    const grade=(1+9*(earned/max)).toFixed(dec);
+    lines.push(''); lines.push('---');
+    lines.push('Points: '+earned+' / '+max);
+    lines.push('Grade (EU 1–10): '+grade);
+    const pill=document.getElementById('grade-pill');
+    pill.textContent='Grade: '+grade; pill.style.display='';
+  }
+
+  document.getElementById('output-pre').textContent=lines.join('\n');
+}
+
+function copyOutput(){
+  const text=document.getElementById('output-pre').textContent;
+  navigator.clipboard.writeText(text).then(()=>toast('Copied!'));
+}
+
+function downloadMd(){
+  const text=document.getElementById('output-pre').textContent;
+  const name=(cur()?.meta?.student||'assessment').replace(/\s+/g,'-').toLowerCase();
+  const blob=new Blob([text],{type:'text/markdown'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a'); a.href=url; a.download=name+'.md'; a.click();
+  URL.revokeObjectURL(url);
+}
+
+// ═══════════════════════════════════════════════════════════
+//  EDITOR MODAL
+// ═══════════════════════════════════════════════════════════
+function openEditor(){
+  document.getElementById('editor-ta').value=currentYaml;
+  document.getElementById('editor-err').className='';
+  document.getElementById('editor-err').textContent='';
+  document.getElementById('editor-overlay').classList.add('open');
+}
+function closeEditor(){ document.getElementById('editor-overlay').classList.remove('open') }
+function applyRubric(){
+  const yaml=document.getElementById('editor-ta').value;
+  try{
+    const parsed=jsyaml.load(yaml);
+    if(!parsed?.sections) throw new Error('No "sections" key found');
+    rubric=parsed; currentYaml=yaml;
+    renderAll(); closeEditor();
+    toast('Rubric applied');
+  }catch(e){
+    const err=document.getElementById('editor-err');
+    err.textContent='⚠ '+e.message; err.className='show';
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+//  SAVE / LOAD SESSION FILE
+// ═══════════════════════════════════════════════════════════
+function saveSession(){
+  const payload=JSON.stringify({yaml:currentYaml,assessments,aid:_aid,currentId},null,2);
+  const blob=new Blob([payload],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a'); a.href=url; a.download='rubric-session.json'; a.click();
+  URL.revokeObjectURL(url); toast('Session saved');
+}
+
+function loadSession(){
+  const inp=document.createElement('input'); inp.type='file'; inp.accept='.json,.yaml,.yml';
+  inp.onchange=async e=>{
+    const file=e.target.files[0]; if(!file) return;
+    const text=await file.text();
+    try{
+      if(file.name.endsWith('.json')){
+        const data=JSON.parse(text);
+        if(data.yaml){ currentYaml=data.yaml; rubric=jsyaml.load(currentYaml) }
+        if(data.assessments){ assessments=data.assessments; _aid=data.aid||0 }
+        currentId=data.currentId||assessments[0]?.id;
+        if(assessments.length===0) _newAssessment();
+      }else{
+        // load as rubric YAML
+        rubric=jsyaml.load(text); currentYaml=text;
+      }
+      renderAll(); autosave(); toast('Loaded');
+    }catch(e){ alert('Load error: '+e.message) }
+  };
+  inp.click();
+}
+
+// ═══════════════════════════════════════════════════════════
+//  UTILS
+// ═══════════════════════════════════════════════════════════
+function esc(s){ return s==null?'':String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;') }
+
+function toast(msg){
+  const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),1800);
+}
+
+// ═══════════════════════════════════════════════════════════
+//  RENDER ALL
+// ═══════════════════════════════════════════════════════════
+function renderAll(){
+  renderSidebar(); renderTopbar(); loadMeta(); renderForm(); refreshOutput();
+}
+
+// close modal on backdrop click
+document.getElementById('editor-overlay').addEventListener('click',e=>{ if(e.target===e.currentTarget) closeEditor() });
+
+init();
+</script>
+</body>
+</html>
