@@ -1,0 +1,1798 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>SRD Rubric Tool</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/4.1.0/js-yaml.min.js"></script>
+<style>
+/* ── RESET & BASE ── */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;font-size:14px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;background:#f0f0f0;color:#1a1a1a}
+
+/* ── LAYOUT ── */
+#shell{display:flex;height:100vh;overflow:hidden}
+
+/* left sidebar */
+#sidebar{width:210px;min-width:210px;background:#fff;border-right:1px solid #ddd;display:flex;flex-direction:column;overflow:hidden}
+#sb-head{padding:12px 14px 8px;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#888;border-bottom:1px solid #eee}
+#sb-list{flex:1;overflow-y:auto}
+.sb-item{display:flex;align-items:center;padding:8px 14px;gap:4px;cursor:pointer;border-left:3px solid transparent}
+.sb-item:hover{background:#f5f5f5}
+.sb-item.active{background:#e8f0fa;border-left-color:#2060c0;color:#1a50a0}
+.sb-item .sb-name{flex:1;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sb-item input.rename-inp{flex:1;font-size:13px;border:none;outline:none;background:transparent;display:none}
+.icon-btn{background:none;border:none;cursor:pointer;padding:2px 3px;border-radius:3px;color:#aaa;font-size:13px;line-height:1;flex-shrink:0}
+.icon-btn:hover{color:#333;background:#eee}
+#sb-actions{padding:10px;border-top:1px solid #eee;display:grid;grid-template-columns:1fr 1fr;gap:6px}
+#sb-actions button{font-size:12px;padding:7px 4px;border:1px solid #ccc;background:#fff;border-radius:5px;cursor:pointer;text-align:center}
+#sb-actions button:hover{background:#f0f0f0}
+#sb-actions .full{grid-column:span 2}
+#btn-server{background:#e8f0fa;border-color:#aac4e8;color:#1a5fa8;font-weight:600}
+#btn-server:hover{background:#d4e5f7}
+#btn-server.loading{opacity:.6;pointer-events:none}
+#server-status{font-size:11px;padding:4px 10px;text-align:center;border-top:1px solid #eee;color:#888;display:none}
+#server-status.ok{color:#217a3c;background:#e6f5ec;display:block}
+#server-status.err{color:#c0392b;background:#fdecea;display:block}
+
+/* main */
+#main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
+
+/* topbar */
+#topbar{height:52px;background:#fff;border-bottom:1px solid #ddd;display:flex;align-items:center;padding:0 20px;gap:16px;flex-shrink:0}
+#tb-left{width:140px;flex-shrink:0}
+#tb-center{flex:1;text-align:center}
+#tb-title{font-size:15px;font-weight:700}
+#tb-sub{font-size:12px;color:#888;margin-top:1px}
+#tb-right{width:140px;display:flex;justify-content:flex-end;gap:8px;align-items:center}
+.grade-pill{font-size:13px;font-weight:700;padding:4px 12px;border-radius:20px;background:#e8f0fa;color:#1a50a0;display:none}
+.btn{font-size:12px;padding:6px 14px;border:1px solid #bbb;background:#fff;border-radius:5px;cursor:pointer;white-space:nowrap}
+.btn:hover{background:#f0f0f0}
+.btn.primary{background:#1a5fa8;color:#fff;border-color:#1a5fa8}
+.btn.primary:hover{background:#1550a0}
+
+/* content split */
+#content{flex:1;display:flex;overflow:hidden}
+#form-area{flex:1;overflow-y:auto;padding:20px 28px 40px}
+#sections-nav{width:190px;min-width:190px;background:#fff;border-left:1px solid #ddd;padding:14px 0;overflow-y:auto}
+#sections-nav h3{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#888;padding:0 16px 8px}
+.nav-link{display:block;padding:6px 16px;font-size:13px;color:#555;cursor:pointer;border-left:3px solid transparent;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.nav-link:hover{color:#1a1a1a;background:#f5f5f5}
+.nav-link.active{color:#1a5fa8;border-left-color:#1a5fa8;background:#e8f0fa;font-weight:500}
+
+/* ── META BAR ── */
+#meta-bar{background:#fff;border:1px solid #ddd;border-radius:6px;padding:12px 16px;margin-bottom:20px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+.meta-field label{display:block;font-size:11px;font-weight:600;color:#777;letter-spacing:.05em;text-transform:uppercase;margin-bottom:4px}
+.meta-field input{width:100%;padding:7px 10px;border:1px solid #ddd;border-radius:4px;font-size:13px;font-family:inherit}
+.meta-field input:focus{outline:none;border-color:#1a5fa8}
+
+/* ── SECTIONS ── */
+.form-section{margin-bottom:28px;scroll-margin-top:20px}
+.form-section>h2{font-size:20px;font-weight:700;padding-bottom:10px;border-bottom:2px solid #eee;margin-bottom:16px}
+
+/* ── FIELD BLOCK ── */
+.field-block{margin-bottom:18px}
+.field-label{font-size:13px;font-weight:700;margin-bottom:4px}
+.field-desc{font-size:12px;color:#888;margin-bottom:6px}
+
+/* slider */
+.slider-wrap{display:flex;align-items:center;gap:12px}
+.slider-wrap input[type=range]{flex:1;height:6px;-webkit-appearance:none;appearance:none;background:#ddd;border-radius:3px;outline:none;cursor:pointer}
+.slider-wrap input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:#1a5fa8;cursor:pointer}
+.slider-wrap input[type=range]::-moz-range-thumb{width:20px;height:20px;border:none;border-radius:50%;background:#1a5fa8;cursor:pointer}
+.slider-readout{font-size:13px;font-weight:700;min-width:48px;text-align:right;color:#1a5fa8}
+.slider-bounds{display:flex;justify-content:space-between;font-size:11px;color:#aaa;margin-top:2px;padding:0 0}
+
+/* checkbox grid */
+.checkbox-grid{display:flex;flex-wrap:wrap;gap:6px}
+.cb-item{display:flex;align-items:center;gap:6px;padding:5px 10px;border:1px solid #ddd;border-radius:4px;cursor:pointer;user-select:none}
+.cb-item:hover{background:#f5f5f5}
+.cb-item.checked{background:#e8f0fa;border-color:#1a5fa8}
+.cb-item input{accent-color:#1a5fa8;cursor:pointer}
+.cb-item label{font-size:13px;cursor:pointer}
+
+/* radio */
+.radio-list{display:flex;flex-direction:column;gap:5px}
+.radio-opt{display:flex;align-items:center;gap:8px;padding:7px 12px;border:1px solid #ddd;border-radius:4px;cursor:pointer;user-select:none}
+.radio-opt:hover{background:#f5f5f5}
+.radio-opt.selected{background:#e8f0fa;border-color:#1a5fa8}
+.radio-opt input{accent-color:#1a5fa8;cursor:pointer}
+.radio-opt label{flex:1;font-size:13px;cursor:pointer}
+.radio-pts{font-size:11px;color:#aaa}
+
+/* checklist two-column */
+.checklist-cols{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.cl-col{display:flex;flex-direction:column;gap:4px}
+.cl-head{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:4px 8px;border-radius:3px;margin-bottom:2px}
+.cl-head.neg{color:#c0392b;background:#fdecea}
+.cl-head.pos{color:#217a3c;background:#e6f5ec}
+.cl-check{display:flex;align-items:flex-start;gap:7px;padding:6px 9px;border:1px solid #ddd;border-radius:4px;cursor:pointer;user-select:none;line-height:1.35}
+.cl-check:hover{background:#f8f8f8}
+.cl-check.checked.neg{background:#fdecea;border-color:#e88}
+.cl-check.checked.pos{background:#e6f5ec;border-color:#6b6}
+.cl-check input{accent-color:#1a5fa8;cursor:pointer;flex-shrink:0;margin-top:2px}
+.cl-check label{font-size:12px;cursor:pointer}
+.cl-note{margin-top:4px}
+.cl-note input{width:100%;padding:6px 9px;border:1px solid #ddd;border-radius:4px;font-size:12px;font-family:inherit}
+.cl-note input:focus{outline:none;border-color:#1a5fa8}
+.cl-add{display:flex;gap:4px;margin-top:4px}
+.cl-add input{flex:1;padding:5px 9px;border:1px solid #ddd;border-radius:4px;font-size:12px;font-family:inherit;color:#aaa}
+.cl-add input:focus{outline:none;border-color:#1a5fa8;color:#1a1a1a}
+.cl-add button{padding:5px 10px;border:1px solid #bbb;background:#fff;border-radius:4px;font-size:12px;cursor:pointer}
+.cl-add button:hover{background:#f0f0f0}
+
+/* text / textarea */
+.text-inp{width:100%;padding:7px 10px;border:1px solid #ddd;border-radius:4px;font-size:13px;font-family:inherit}
+.text-inp:focus{outline:none;border-color:#1a5fa8}
+textarea.text-inp{resize:vertical;min-height:64px;line-height:1.5}
+
+/* ── OUTPUT ── */
+#output-wrap{background:#fff;border:1px solid #ddd;border-radius:6px;margin-top:4px}
+#output-head{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;border-bottom:1px solid #eee}
+#output-head h3{font-size:15px;font-weight:700}
+#output-btns{display:flex;gap:6px}
+#output-pre{font-family:'Cascadia Code','Fira Mono','Courier New',monospace;font-size:12px;line-height:1.65;white-space:pre-wrap;word-break:break-word;padding:14px 16px;max-height:380px;overflow-y:auto;color:#222;background:#fafafa;border-radius:0 0 6px 6px}
+
+/* ── EDITOR MODAL ── */
+#editor-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;align-items:center;justify-content:center}
+#editor-overlay.open{display:flex}
+#editor-box{background:#fff;border-radius:8px;width:min(860px,96vw);max-height:92vh;display:flex;flex-direction:column;box-shadow:0 12px 48px rgba(0,0,0,.22)}
+#editor-box header{display:flex;align-items:center;justify-content:space-between;padding:12px 18px;border-bottom:1px solid #eee}
+#editor-box header h2{font-size:15px;font-weight:700}
+#editor-hint{font-size:12px;color:#888;padding:8px 18px;border-bottom:1px solid #eee;background:#fffbe6}
+#editor-ta{flex:1;resize:none;border:none;outline:none;font-family:'Cascadia Code','Fira Mono','Courier New',monospace;font-size:12px;padding:14px 18px;min-height:440px;background:#fafaf8;color:#1a1a1a;overflow-y:auto}
+#editor-err{font-size:12px;color:#c0392b;padding:6px 18px;display:none}
+#editor-err.show{display:block}
+#editor-foot{display:flex;justify-content:flex-end;gap:8px;padding:10px 18px;border-top:1px solid #eee}
+
+/* ── TOAST ── */
+#toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1a1a1a;color:#fff;padding:8px 20px;border-radius:20px;font-size:13px;opacity:0;pointer-events:none;transition:opacity .2s;z-index:999}
+#toast.show{opacity:1}
+
+@media(max-width:680px){
+  #sidebar,#sections-nav{display:none}
+  #meta-bar{grid-template-columns:1fr}
+  .checklist-cols{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<div id="shell">
+
+  <!-- ══ LEFT SIDEBAR ══ -->
+  <div id="sidebar">
+    <div id="sb-head">Assessments</div>
+    <div id="sb-list"></div>
+    <div id="sb-actions">
+      <button class="full" onclick="newAssessment()">+ New</button>
+      <button onclick="duplicateCurrent()">⧉ Duplicate</button>
+      <button onclick="saveSession()">↓ Save</button>
+      <button onclick="loadSession()">↑ Load</button>
+      <button class="full" id="btn-server" onclick="loadServerRubric()">⇩ Load server rubric</button>
+    </div>
+    <div id="server-status"></div>
+  </div>
+
+  <!-- ══ MAIN ══ -->
+  <div id="main">
+
+    <!-- topbar -->
+    <div id="topbar">
+      <div id="tb-left">
+        <button class="btn" onclick="openEditor()">✎ Edit rubric</button>
+      </div>
+      <div id="tb-center">
+        <div id="tb-title">—</div>
+        <div id="tb-sub"></div>
+      </div>
+      <div id="tb-right">
+        <span id="grade-pill" class="grade-pill"></span>
+      </div>
+    </div>
+
+    <!-- form + sections nav -->
+    <div id="content">
+      <div id="form-area">
+
+        <!-- student meta -->
+        <div id="meta-bar">
+          <div class="meta-field">
+            <label>Student name</label>
+            <input id="m-student" placeholder="e.g. Mara de Vries" oninput="saveMeta();refreshOutput()"/>
+          </div>
+          <div class="meta-field">
+            <label>Project / submission</label>
+            <input id="m-project" placeholder="e.g. Paper Automaton v2" oninput="saveMeta();refreshOutput()"/>
+          </div>
+          <div class="meta-field">
+            <label>Assessor</label>
+            <input id="m-assessor" placeholder="Your name" oninput="saveMeta();refreshOutput()"/>
+          </div>
+        </div>
+
+        <div id="sections-form"></div>
+
+        <!-- generated output -->
+        <div id="output-wrap">
+          <div id="output-head">
+            <h3>Generated Assessment</h3>
+            <div id="output-btns">
+              <button class="btn" onclick="copyOutput()">Copy</button>
+              <button class="btn" onclick="downloadMd()">Download .md</button>
+            </div>
+          </div>
+          <pre id="output-pre"></pre>
+        </div>
+
+      </div>
+      <div id="sections-nav">
+        <h3>Sections</h3>
+        <div id="nav-links"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ EDITOR MODAL ══ -->
+<div id="editor-overlay">
+  <div id="editor-box">
+    <header>
+      <h2>Rubric definition (YAML)</h2>
+      <button class="icon-btn" style="font-size:18px" onclick="closeEditor()">✕</button>
+    </header>
+    <div id="editor-hint">
+      Paste your rubric YAML here and click <strong>Apply</strong> to regenerate the form.
+      Field types: <code>slider</code> · <code>checkbox</code> · <code>radio</code> · <code>checklist</code> · <code>text</code> · <code>textarea</code>
+    </div>
+    <textarea id="editor-ta" spellcheck="false"></textarea>
+    <div id="editor-err"></div>
+    <div id="editor-foot">
+      <button class="btn" onclick="closeEditor()">Cancel</button>
+      <button class="btn primary" onclick="applyRubric()">Apply rubric</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════════════════════
+//  DEFAULT RUBRIC YAML
+// ═══════════════════════════════════════════════════════════
+const DEFAULT_YAML = `# ══════════════════════════════════════════════════════════════════
+#  RUBRIC DEFINITION — Social Robot Design (Portfolio Assessment)
+#  ──────────────────────────────────────────────────────────────────
+#  Total points: 100
+#  EU grade: 1 + 9 × (earned / 100)
+#
+#  1. General aspects                10 pt  (2+2+2+2+2)
+#  2. Case description               10 pt  (2+2+3+3)
+#  3. Scenario design tool           10 pt  (2+3+3+2)
+#  4. Expressiveness tool (session)   8 pt  (2+3+3)
+#  5. Embodiment design tool         10 pt  (2+3+3+2)
+#  6. Ethics / EduLARP (session)      6 pt  (1+2+3)
+#  7. Behaviour design tool          10 pt  (2+3+3+2)
+#  8. In-depth group assignment      26 pt  (4+6+3+6+2+5)
+#  9. Poster and movie               10 pt  (5+5 checklist)
+# ══════════════════════════════════════════════════════════════════
+
+title: "Social Robot Design"
+course: "SRD-2025"
+grading: true
+grade_decimals: 1
+
+sections:
+
+  # ════════════════════════════════════════════════════════════════
+  # 1. GENERAL ASPECTS  ·  10 pt  (2+2+2+2+2)
+  # ════════════════════════════════════════════════════════════════
+  - id: general
+    title: "general aspects"
+    fields:
+
+      - id: gen_structure
+        label: "structure and navigation (2 pt)"
+        type: slider
+        min: 0
+        max: 2
+        step: 1
+        points: 2
+        description: "Clear chapter structure, table of contents, sections easy to find, pages well-chunked."
+
+      - id: gen_structure_obs
+        label: "structure observations"
+        type: checklist
+        points_per_positive: 0
+        negative:
+          - "no table of contents or overview"
+          - "sections hard to find or illogically ordered"
+          - "walls of text — pages not chunked"
+        positive:
+          - "clear chapter structure matching course topics"
+          - "table of contents or overview page present"
+          - "pages well-chunked and scannable"
+
+      - id: gen_style
+        label: "academic style (2 pt)"
+        type: slider
+        min: 0
+        max: 2
+        step: 1
+        points: 2
+        description: "Complete sentences, no informal or second-person language, course terminology used correctly."
+
+      - id: gen_style_obs
+        label: "style observations"
+        type: checklist
+        points_per_positive: 0
+        negative:
+          - "informal or colloquial language used"
+          - "second-person ('you') forms present"
+          - "course terminology absent or misused"
+          - "unsupported claims — assertions without reasoning"
+        positive:
+          - "academic register maintained throughout"
+          - "course concepts named and used correctly"
+          - "claims supported with reasoning or references"
+
+      - id: gen_images
+        label: "images with captions, referenced in text (2 pt)"
+        type: slider
+        min: 0
+        max: 2
+        step: 1
+        points: 2
+        description: "Every image has a descriptive caption and is referenced in the running text. No decorative images."
+
+      - id: gen_images_obs
+        label: "image observations"
+        type: checklist
+        points_per_positive: 0
+        negative:
+          - "images present without caption"
+          - "decorative or irrelevant images used"
+          - "images not referenced in running text"
+          - "images interchangeable — could illustrate any project"
+        positive:
+          - "every image has a descriptive caption"
+          - "images referenced where discussed"
+          - "images are specific to this project and add meaning"
+
+      - id: gen_references
+        label: "literature and internal cross-references (2 pt)"
+        type: slider
+        min: 0
+        max: 2
+        step: 1
+        points: 2
+        description: "Literature cited consistently. Sections cross-reference each other where relevant."
+
+      - id: gen_references_obs
+        label: "reference observations"
+        type: checklist
+        points_per_positive: 0
+        negative:
+          - "no or inconsistent literature references"
+          - "no internal cross-references between sections"
+          - "reference format inconsistent"
+        positive:
+          - "literature cited consistently in recognised format"
+          - "case description linked from tool sections"
+          - "group work references relevant course tool section"
+
+      - id: gen_coherence
+        label: "portfolio coherence and learning arc (2 pt)"
+        type: slider
+        min: 0
+        max: 2
+        step: 1
+        points: 2
+        description: "Later sections visibly informed by earlier ones. At least one explicit reflection on how understanding of the case changed across the course."
+
+      - id: gen_coherence_obs
+        label: "coherence observations"
+        type: checklist
+        points_per_positive: 0
+        negative:
+          - "portfolio reads as separate assignments, not a developed document"
+          - "no evidence later sections build on earlier work"
+          - "no reflection on how case understanding developed"
+        positive:
+          - "later sections reference and build on earlier work"
+          - "explicit moment of reflection on changed understanding"
+          - "design decisions trace back through the portfolio"
+
+      - id: gen_note
+        label: "general notes"
+        type: textarea
+        placeholder: "Overall quality of the portfolio as a document…"
+
+
+  # ════════════════════════════════════════════════════════════════
+  # 2. CASE DESCRIPTION  ·  10 pt  (2+2+3+3)
+  # ════════════════════════════════════════════════════════════════
+  - id: case
+    title: "case description"
+    fields:
+
+      - id: case_explanation
+        label: "case explanation and target audience (2 pt)"
+        type: slider
+        min: 0
+        max: 2
+        step: 1
+        points: 2
+        description: "Deployment context, robot role, and user groups described specifically. Named context, not a generic one."
+
+      - id: case_explanation_obs
+        label: "case explanation observations"
+        type: checklist
+        points_per_positive: 0
+        negative:
+          - "context is generic — not a specific named situation"
+          - "user groups not identified"
+          - "robot's role unclear or underspecified"
+          - "case appears hypothetical rather than grounded"
+        positive:
+          - "named, specific deployment context"
+          - "direct and indirect user groups identified"
+          - "robot's role clearly described"
+          - "case discussed with someone in that context"
+
+      - id: case_visual
+        label: "visualisation of the case (2 pt)"
+        type: slider
+        min: 0
+        max: 2
+        step: 1
+        points: 2
+        description: "Case visualised: context photos/sketches, stakeholder diagrams, scenario thumbnails. Reader understands case without reading text."
+
+      - id: case_visual_obs
+        label: "visualisation observations"
+        type: checklist
+        points_per_positive: 0
+        negative:
+          - "no visualisation of the case context"
+          - "images present but not explained or labelled"
+          - "visual gives no information a reader couldn't infer"
+        positive:
+          - "context photos or sketches with annotation"
+          - "stakeholder diagram or user map"
+          - "case understandable from visuals alone"
+
+      - id: case_lit_core
+        label: "core HRI literature — min. 5 publications (3 pt)"
+        type: slider
+        min: 0
+        max: 3
+        step: 1
+        points: 3
+        description: "At least 5 HRI publications cited and connected to specific design decisions or open questions in the case — not summary annotations."
+
+      - id: case_lit_core_obs
+        label: "core literature observations"
+        type: checklist
+        points_per_positive: 0
+        negative:
+          - "fewer than 5 HRI publications cited"
+          - "publications listed but not connected to the case"
+          - "references used as decoration, not argument"
+        positive:
+          - "5 or more directly relevant HRI publications"
+          - "each publication connected to a specific design decision"
+          - "references used to justify or problematise case choices"
+
+      - id: case_lit_adjacent
+        label: "adjacent field literature — min. 5 publications (3 pt)"
+        type: slider
+        min: 0
+        max: 3
+        step: 1
+        points: 3
+        description: "At least 5 publications from adjacent fields (service design, medical communication, human factors, etc.) discussed and connected to the case."
+
+      - id: case_lit_adjacent_obs
+        label: "adjacent literature observations"
+        type: checklist
+        points_per_positive: 0
+        negative:
+          - "fewer than 5 adjacent field publications"
+          - "adjacent publications not discussed — just listed"
+          - "publications do not expand the design space"
+        positive:
+          - "5 or more adjacent field publications"
+          - "each connected to the case and discussed"
+          - "adjacent literature genuinely expands the framing"
+
+      - id: case_note
+        label: "case description notes"
+        type: textarea
+        placeholder: "Observations on the quality and grounding of the case description…"
+
+
+  # ════════════════════════════════════════════════════════════════
+  # 3. SCENARIO DESIGN TOOL  ·  10 pt  (2+3+3+2)
+  # ════════════════════════════════════════════════════════════════
+  - id: scenario
+    title: "scenario design tool"
+    fields:
+
+      - id: sc_visual
+        label: "visualisation (2 pt)"
+        type: slider
+        min: 0
+        max: 2
+        step: 1
+        points: 2
+        description: "Visualise tool structure, tool-in-action, and output. Captions label each stage: conceptualisation, realisation, in-action, result."
+
+      - id: sc_visual_obs
+        label: "visualisation observations"
+        type: checklist
+        points_per_positive: 0
+        negative:
+          - "tool structure not visualised"
+          - "no image of tool in use"
+          - "output not shown"
+          - "images present but not labelled by stage"
+        positive:
+          - "tool structure shown (cards, canvas, protocol diagram)"
+          - "at least one image of tool in action"
+          - "output of the tool shown and captioned"
+          - "stages labelled: conceptualisation → realisation → in-action → result"
+
+      - id: sc_tool
+        label: "tool design — HRI knowledge embedded (3 pt)"
+        type: slider
+        min: 0
+        max: 3
+        step: 1
+        points: 3
+        description: "Grounded in a course framework (scenario-based design, narrative templates, boundary conditions). HRI-specific knowledge made explicit."
+
+      - id: sc_tool_obs
+        label: "tool design observations"
+        type: checklist
+        points_per_positive: 0
+        negative:
+          - "no theoretical framework identified"
+          - "HRI knowledge not embedded — could be a generic tool"
+          - "framework named but not operationalised in the tool"
+        positive:
+          - "specific HRI framework named and applied"
+          - "tool embeds HRI knowledge explicitly"
+          - "explains what HRI-specific capability the tool provides"
+
+      - id: sc_application
+        label: "application to case (3 pt)"
+        type: slider
+        min: 0
+        max: 3
+        step: 1
+        points: 3
+        description: "Session documented: experiment described, observations made, output produced. Design decision informed or changed as a result."
+
+      - id: sc_application_obs
+        label: "application observations"
+        type: checklist
+        points_per_positive: 0
+        negative:
+          - "session not documented or only described vaguely"
+          - "no output from the tool shown"
+          - "no design decision connected to the tool use"
+        positive:
+          - "session described with sufficient detail"
+          - "output quoted or reproduced"
+          - "specific design decision informed by tool use"
+
+      - id: sc_eval
+        label: "evaluation and reflection (2 pt)"
+        type: slider
+        min: 0
+        max: 2
+        step: 1
+        points: 2
+        description: "Evaluates outcome quality AND tool quality. Reflection connected to at least one publication."
+
+      - id: sc_eval_obs
+        label: "evaluation observations"
+        type: checklist
+        points_per_positive: 0
+        negative:
+          - "only outcome evaluated — tool quality not addressed"
+          - "no publication connected to reflection"
+          - "evaluation is superficial or only positive"
+        positive:
+          - "outcome quality evaluated explicitly"
+          - "tool quality evaluated explicitly (specificity, usability, generalisability)"
+          - "reflection connected to at least one publication"
+
+      - id: sc_note
+        label: "scenario tool notes"
+        type: textarea
+        placeholder: "Observations on the scenario design tool section…"
+
+
+  # ════════════════════════════════════════════════════════════════
+  # 4. EXPRESSIVENESS DESIGN TOOL (IN-SESSION)  ·  8 pt  (2+3+3)
+  # ════════════════════════════════════════════════════════════════
+  - id: expression
+    title: "expressiveness design tool (in-session)"
+    fields:
+
+      - id: ex_visual
+        label: "visualisation (2 pt)"
+        type: slider
+        min: 0
+        max: 2
+        step: 1
+        points: 2
+        description: "Annotated motion sketches, Laban notation, photos of expressive positions, or video stills with annotation. Detailed enough for someone not in the session."
+
+      - id: ex_visual_obs
+        label: "visualisation observations"
+        type: checklist
+        points_per_positive: 0
+        negative:
+          - "no visual record of the session"
+          - "images present but not annotated"
+          - "visuals too sparse to understand what happened"
+        positive:
+          - "annotated motion sketches or Laban notation present"
+          - "photos or stills from the session with captions"
+          - "visual record sufficient for someone not in the session"
+
+      - id: ex_observation
+        label: "structured observation (3 pt)"
+        type: slider
+        min: 0
+        max: 3
+        step: 1
+        points: 3
+        description: "Session described with a structured framework. What did the tool make visible? Where did the vocabulary reach its limits for your case?"
+
+      - id: ex_observation_obs
+        label: "observation quality observations"
+        type: checklist
+        points_per_positive: 0
+        negative:
+          - "no structured framework used"
+          - "description only covers what happened — not what was revealed"
+          - "limits of the tool not identified"
+        positive:
+          - "explicit framework applied to structure observations"
+          - "articulates what the tool made visible"
+          - "identifies where the tool's vocabulary reached its limits"
+
+      - id: ex_reflection
+        label: "reflection — applicability and HRI grounding (3 pt)"
+        type: slider
+        min: 0
+        max: 3
+        step: 1
+        points: 3
+        description: "Which aspects apply to your case? What would need to change? Connected to at least one publication on expressive HRI or Laban analysis."
+
+      - id: ex_reflection_obs
+        label: "reflection observations"
+        type: checklist
+        points_per_positive: 0
+        negative:
+          - "no critical assessment of applicability"
+          - "reflection is generic — could apply to any case"
+          - "no publication connected to reflection"
+        positive:
+          - "specific aspects identified as applicable to the case"
+          - "specific aspects identified as not applicable, with reasoning"
+          - "reflection connected to at least one relevant publication"
+
+      - id: ex_note
+        label: "expressiveness tool notes"
+        type: textarea
+        placeholder: "Observations on the expressiveness session section…"
+
+
+  # ════════════════════════════════════════════════════════════════
+  # 5. EMBODIMENT DESIGN TOOL  ·  10 pt  (2+3+3+2)
+  # ════════════════════════════════════════════════════════════════
+  - id: embodiment
+    title: "embodiment design tool"
+    fields:
+
+      - id: em_visual
+        label: "visualisation (2 pt)"
+        type: slider
+        min: 0
+        max: 2
+        step: 1
+        points: 2
+        description: "Visualise tool structure, embodiment options compared, moment of use, and design outcome. Label by stage."
+
+      - id: em_visual_obs
+        label: "visualisation observations"
+        type: checklist
+        points_per_positive: 0
+        negative:
+          - "tool structure not visualised"
+          - "embodiment options not shown"
+          - "no image of tool in use"
+          - "stages not labelled"
+        positive:
+          - "tool structure or materials shown"
+          - "embodiment options generated or compared are visible"
+          - "at least one image of tool in action"
+          - "stages labelled: conceptualisation → realisation → in-action → result"
+
+      - id: em_tool
+        label: "tool design — HRI knowledge embedded (3 pt)"
+        type: slider
+        min: 0
+        max: 3
+        step: 1
+        points: 3
+        description: "HRI knowledge (proxemics, Uncanny Valley, form/function mapping) explicitly operationalised in the tool structure — not just mentioned."
+
+      - id: em_tool_obs
+        label: "tool design observations"
+        type: checklist
+        points_per_positive: 0
+        negative:
+          - "HRI concepts mentioned but not embedded in tool"
+          - "tool could be a generic design tool"
+          - "no explanation of what the tool enables beyond generic methods"
+        positive:
+          - "specific HRI concept operationalised in tool structure"
+          - "explains how the tool forces or guides an HRI-aware decision"
+          - "tool goes beyond what a generic embodiment method would provide"
+
+      - id: em_application
+        label: "application to case (3 pt)"
+        type: slider
+        min: 0
+        max: 3
+        step: 1
+        points: 3
+        description: "Session documented: inputs, options generated, observations, embodiment direction reached. Case description updated as a result."
+
+      - id: em_application_obs
+        label: "application observations"
+        type: checklist
+        points_per_positive: 0
+        negative:
+          - "session not documented"
+          - "no embodiment direction reached"
+          - "case description not updated"
+        positive:
+          - "session inputs and process documented"
+          - "specific embodiment direction reached and justified"
+          - "case description updated based on tool output"
+
+      - id: em_eval
+        label: "evaluation and reflection (2 pt)"
+        type: slider
+        min: 0
+        max: 2
+        step: 1
+        points: 2
+        description: "Outcome and tool quality evaluated. Connected to at least one publication on robot embodiment or proxemics."
+
+      - id: em_eval_obs
+        label: "evaluation observations"
+        type: checklist
+        points_per_positive: 0
+        negative:
+          - "evaluation absent or only positive"
+          - "outcome and tool quality not distinguished"
+          - "no publication connected"
+        positive:
+          - "outcome quality evaluated"
+          - "tool quality evaluated (specificity, usability, generalisability)"
+          - "connected to at least one relevant publication"
+
+      - id: em_note
+        label: "embodiment tool notes"
+        type: textarea
+        placeholder: "Observations on the embodiment design tool section…"
+
+
+  # ════════════════════════════════════════════════════════════════
+  # 6. ETHICS / EDULARP (IN-SESSION)  ·  6 pt  (1+2+3)
+  # ════════════════════════════════════════════════════════════════
+  - id: ethics
+    title: "ethics / EduLARP (in-session)"
+    fields:
+
+      - id: et_visual
+        label: "visualisation (1 pt)"
+        type: slider
+        min: 0
+        max: 1
+        step: 1
+        points: 1
+        description: "At least one image with caption explaining the ethical situation explored in the session."
+
+      - id: et_visual_obs
+        label: "visualisation observations"
+        type: checklist
+        points_per_positive: 0
+        negative:
+          - "no visual documentation of the session"
+          - "image present but not captioned or explained"
+        positive:
+          - "at least one image with caption explaining the ethical situation"
+
+      - id: et_observation
+        label: "structured observation (2 pt)"
+        type: slider
+        min: 0
+        max: 2
+        step: 1
+        points: 2
+        description: "Ethical tensions made visible described specifically. What did the roleplay format reveal that desk-based analysis would not?"
+
+      - id: et_observation_obs
+        label: "observation quality observations"
+        type: checklist
+        points_per_positive: 0
+        negative:
+          - "description only covers what happened — not what was revealed"
+          - "observations generic — could apply to any ethics exercise"
+          - "does not address what roleplay reveals beyond desk analysis"
+        positive:
+          - "specific ethical tensions identified and described"
+          - "stakeholder perspectives described concretely"
+          - "articulates what roleplay format made visible"
+
+      - id: et_reflection
+        label: "reflection — applicability and HRI grounding (3 pt)"
+        type: slider
+        min: 0
+        max: 3
+        step: 1
+        points: 3
+        description: "Which issues are relevant to your case? What would an adapted tool look like? Connected to at least one publication on robot ethics or value-sensitive design."
+
+      - id: et_reflection_obs
+        label: "reflection observations"
+        type: checklist
+        points_per_positive: 0
+        negative:
+          - "no connection to own design case"
+          - "no proposal for adaptation"
+          - "no publication connected"
+        positive:
+          - "specific ethical issues connected to design case"
+          - "concrete proposal for how tool could be adapted"
+          - "connected to at least one relevant publication"
+
+      - id: et_note
+        label: "ethics / EduLARP notes"
+        type: textarea
+        placeholder: "Observations on the ethics session section…"
+
+
+  # ════════════════════════════════════════════════════════════════
+  # 7. BEHAVIOUR DESIGN TOOL  ·  10 pt  (2+3+3+2)
+  # ════════════════════════════════════════════════════════════════
+  - id: behaviour
+    title: "behaviour design tool"
+    fields:
+
+      - id: bh_visual
+        label: "visualisation (2 pt)"
+        type: slider
+        min: 0
+        max: 2
+        step: 1
+        points: 2
+        description: "Visualise tool structure, architecture/behaviour model produced, and at least one observation from testing. Label by stage."
+
+      - id: bh_visual_obs
+        label: "visualisation observations"
+        type: checklist
+        points_per_positive: 0
+        negative:
+          - "tool structure not visualised"
+          - "no architecture or behaviour model shown"
+          - "no evidence from testing shown"
+          - "stages not labelled"
+        positive:
+          - "tool structure shown (diagrams, cards, protocol)"
+          - "architecture or behaviour model for the case shown"
+          - "at least one observation from testing documented visually"
+          - "stages labelled: conceptualisation → realisation → in-action → result"
+
+      - id: bh_tool
+        label: "tool design — HRI knowledge embedded (3 pt)"
+        type: slider
+        min: 0
+        max: 3
+        step: 1
+        points: 3
+        description: "At least one HRI concept operationalised (reactive/deliberative, autonomy allocation, graceful degradation, social signal interpretation)."
+
+      - id: bh_tool_obs
+        label: "tool design observations"
+        type: checklist
+        points_per_positive: 0
+        negative:
+          - "HRI concepts not embedded — generic software tool"
+          - "concept mentioned but not operationalised in tool structure"
+          - "no explanation of what HRI-specific capability the tool provides"
+        positive:
+          - "specific HRI concept operationalised in tool"
+          - "explains what the tool enables beyond generic software design"
+          - "tool structure reflects HRI-specific knowledge"
+
+      - id: bh_application
+        label: "application to case (3 pt)"
+        type: slider
+        min: 0
+        max: 3
+        step: 1
+        points: 3
+        description: "Session documented: tool output, test method (WoZ/simulation/prototype), observations. What did testing reveal that design time did not anticipate?"
+
+      - id: bh_application_obs
+        label: "application observations"
+        type: checklist
+        points_per_positive: 0
+        negative:
+          - "session not documented"
+          - "test method not described"
+          - "no unexpected findings from testing"
+        positive:
+          - "tool output documented"
+          - "test method described (WoZ, simulation, or prototype)"
+          - "testing revealed something not anticipated at design time"
+
+      - id: bh_eval
+        label: "evaluation and reflection (2 pt)"
+        type: slider
+        min: 0
+        max: 2
+        step: 1
+        points: 2
+        description: "Outcome and tool quality evaluated. Relationship to group assignment direction addressed. Connected to at least one publication."
+
+      - id: bh_eval_obs
+        label: "evaluation observations"
+        type: checklist
+        points_per_positive: 0
+        negative:
+          - "evaluation absent or only positive"
+          - "relationship to group assignment not addressed"
+          - "no publication connected"
+        positive:
+          - "outcome and tool quality both evaluated"
+          - "relationship to group assignment direction addressed"
+          - "connected to at least one relevant publication"
+
+      - id: bh_note
+        label: "behaviour tool notes"
+        type: textarea
+        placeholder: "Observations on the behaviour design tool section…"
+
+
+  # ════════════════════════════════════════════════════════════════
+  # 8. IN-DEPTH GROUP ASSIGNMENT  ·  26 pt  (4+6+3+6+2+5)
+  # ════════════════════════════════════════════════════════════════
+  - id: group
+    title: "in-depth group assignment"
+    fields:
+
+      - id: gr_direction
+        label: "motivated direction choice (4 pt)"
+        type: slider
+        min: 0
+        max: 4
+        step: 1
+        points: 4
+        description: "Direction chosen and motivated in relation to the case. Extension of course tool explained, or gap filled by different direction identified."
+
+      - id: gr_direction_obs
+        label: "direction choice observations"
+        type: checklist
+        points_per_positive: 0
+        negative:
+          - "direction not explicitly stated"
+          - "motivation not connected to the case"
+          - "no explanation of what is extended or what gap is filled"
+        positive:
+          - "direction stated clearly (behaviour / expression / embodiment / scenario / ethics)"
+          - "motivation connected to specific case need"
+          - "extension or gap identified and justified"
+
+      - id: gr_direction_note
+        label: "direction choice note"
+        type: text
+        placeholder: "Which direction chosen and how well motivated…"
+
+      - id: gr_visual
+        label: "visualisation — conceptualisation and physicalisation (6 pt)"
+        type: slider
+        min: 0
+        max: 6
+        step: 1
+        points: 6
+        description: "Conceptualisation: sketches, diagrams, architecture drawings showing design iterations. Physicalisation: photos/stills of building/programming in intermediate states."
+
+      - id: gr_visual_obs
+        label: "visualisation observations"
+        type: checklist
+        points_per_positive: 0
+        negative:
+          - "conceptualisation visuals absent"
+          - "only final version shown — no intermediate states"
+          - "physicalisation not documented"
+          - "images present but not annotated or staged"
+        positive:
+          - "conceptualisation sketches or diagrams show iteration"
+          - "multiple intermediate states visible"
+          - "physicalisation documented with photos or stills"
+          - "annotations explain what is shown at each stage"
+
+      - id: gr_testplan
+        label: "test plan and method (3 pt)"
+        type: slider
+        min: 0
+        max: 3
+        step: 1
+        points: 3
+        description: "Who tested, what setting, what protocol, what was observed or measured. Actual hardware or realistic proxy. Changes to plan documented."
+
+      - id: gr_testplan_obs
+        label: "test plan observations"
+        type: checklist
+        points_per_positive: 0
+        negative:
+          - "no test plan described"
+          - "test did not involve actual hardware or realistic proxy"
+          - "changes from planned to executed not documented"
+        positive:
+          - "test plan described: who, setting, protocol, observation target"
+          - "actual hardware or realistic proxy used"
+          - "deviations from plan documented with reasoning"
+
+      - id: gr_observations
+        label: "observations — tool in action (6 pt)"
+        type: slider
+        min: 0
+        max: 6
+        step: 1
+        points: 6
+        description: "Structured observations, unexpected findings, failure and success moments. Evidence the test happened: photos, logs, or observer notes."
+
+      - id: gr_observations_obs
+        label: "observations quality"
+        type: checklist
+        points_per_positive: 0
+        negative:
+          - "no evidence test actually happened"
+          - "observations vague or only positive"
+          - "unexpected findings not documented"
+          - "failures or problems not acknowledged"
+        positive:
+          - "structured observations documented"
+          - "unexpected findings included"
+          - "at least one failure or problem acknowledged"
+          - "evidence of test: photos, logs, or observer notes"
+          - "direct quotes or measurements where available"
+
+      - id: gr_redesign
+        label: "resulting redesign (2 pt)"
+        type: slider
+        min: 0
+        max: 2
+        step: 1
+        points: 2
+        description: "Iteration visible: testing led to a change in the tool or an explicit design decision. Before/after traceable."
+
+      - id: gr_redesign_obs
+        label: "redesign observations"
+        type: checklist
+        points_per_positive: 0
+        negative:
+          - "no iteration visible after testing"
+          - "testing findings not connected to any change"
+        positive:
+          - "specific change in tool or design traced to testing"
+          - "before/after visible in the portfolio"
+
+      - id: gr_eval
+        label: "evaluation and reflection (5 pt)"
+        type: slider
+        min: 0
+        max: 5
+        step: 1
+        points: 5
+        description: "Design outcome evaluated AND tool quality evaluated (specificity, usability, generalisability). Grounded in at least 2 publications."
+
+      - id: gr_eval_obs
+        label: "evaluation observations"
+        type: checklist
+        points_per_positive: 0
+        negative:
+          - "only one axis evaluated (outcome or tool — not both)"
+          - "evaluation is only positive"
+          - "fewer than 2 publications connected"
+          - "tool generalisability not addressed"
+        positive:
+          - "design outcome evaluated explicitly"
+          - "tool quality evaluated: specificity, usability, generalisability"
+          - "honest assessment — limitations named"
+          - "at least 2 publications connected to reflection"
+
+      - id: gr_overall_note
+        label: "overall group assignment notes"
+        type: textarea
+        placeholder: "Overall quality and coherence of the group assignment section…"
+
+
+  # ════════════════════════════════════════════════════════════════
+  # 9. POSTER AND MOVIE  ·  10 pt  (5+5 binary checklist)
+  # ════════════════════════════════════════════════════════════════
+  - id: poster_movie
+    title: "poster and movie"
+    fields:
+
+      - id: pm_intro
+        label: "Note — binary checklist"
+        type: textarea
+        placeholder: "Each criterion is met (1 pt) or not met (0 pt). Add any overall notes here."
+
+      # ── Poster ───────────────────────────────────────────────
+      - id: p1
+        label: "P1 — case and tool identifiable in under 10 seconds (1 pt)"
+        type: radio
+        description: "A reader who has never seen the project can determine the robot, context, and tool without reading body text."
+        points:
+          - label: "not met"
+            value: 0
+          - label: "met"
+            value: 1
+
+      - id: p2
+        label: "P2 — tool structure is visualised (1 pt)"
+        type: radio
+        description: "Tool logic, protocol, or components appear as diagram, canvas, or annotated image — not described in prose."
+        points:
+          - label: "not met"
+            value: 0
+          - label: "met"
+            value: 1
+
+      - id: p3
+        label: "P3 — evidence of application is shown (1 pt)"
+        type: radio
+        description: "At least one image or diagram showing the tool in use with the robot or in the deployment context."
+        points:
+          - label: "not met"
+            value: 0
+          - label: "met"
+            value: 1
+
+      - id: p4
+        label: "P4 — result stated explicitly (1 pt)"
+        type: radio
+        description: "Design outcome visible as a clearly labelled element — not buried in text."
+        points:
+          - label: "not met"
+            value: 0
+          - label: "met"
+            value: 1
+
+      - id: p5
+        label: "P5 — poster production quality (1 pt)"
+        type: radio
+        description: "Layout clean and readable; font sizes legible at poster distance; visual hierarchy guides eye from problem to tool to result."
+        points:
+          - label: "not met"
+            value: 0
+          - label: "met"
+            value: 1
+
+      - id: p_note
+        label: "poster notes"
+        type: text
+        placeholder: "Specific observations on the poster…"
+
+      # ── Movie ────────────────────────────────────────────────
+      - id: m1
+        label: "M1 — challenge framed in first 30 seconds (1 pt)"
+        type: radio
+        description: "Viewer knows the design problem and why it matters before any tool description begins."
+        points:
+          - label: "not met"
+            value: 0
+          - label: "met"
+            value: 1
+
+      - id: m2
+        label: "M2 — tool demonstrated, not just described (1 pt)"
+        type: radio
+        description: "Movie shows tool in use with actual hardware or deployment context — not a slide deck about the tool."
+        points:
+          - label: "not met"
+            value: 0
+          - label: "met"
+            value: 1
+
+      - id: m3
+        label: "M3 — at least one failure or unexpected finding included (1 pt)"
+        type: radio
+        description: "Movie acknowledges something that did not work as expected and what the team did with that."
+        points:
+          - label: "not met"
+            value: 0
+          - label: "met"
+            value: 1
+
+      - id: m4
+        label: "M4 — evaluation addresses design outcome and tool quality (1 pt)"
+        type: radio
+        description: "Two distinct verdicts given: did the robot design improve, and does the tool work as a tool?"
+        points:
+          - label: "not met"
+            value: 0
+          - label: "met"
+            value: 1
+
+      - id: m5
+        label: "M5 — movie production quality (1 pt)"
+        type: radio
+        description: "Audio clear and intelligible throughout; visual material stable and well-framed; 5-minute format respected."
+        points:
+          - label: "not met"
+            value: 0
+          - label: "met"
+            value: 1
+
+      - id: m_note
+        label: "movie notes"
+        type: text
+        placeholder: "Specific observations on the movie…"
+`;
+
+// ═══════════════════════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════════════════════
+let rubric = null;
+let currentYaml = DEFAULT_YAML;
+let assessments = [];   // { id, name, meta:{student,project,assessor}, values:{} }
+let currentId = null;
+let _aid = 0;
+function mkId(){ return 'a'+(++_aid) }
+
+function cur(){ return assessments.find(a=>a.id===currentId) }
+
+// ═══════════════════════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════════════════════
+function init(){
+  // try to load from localStorage
+  try {
+    const saved = localStorage.getItem('rubric_session');
+    if(saved){
+      const data = JSON.parse(saved);
+      currentYaml = data.yaml || DEFAULT_YAML;
+      rubric = jsyaml.load(currentYaml);
+      assessments = data.assessments || [];
+      _aid = data.aid || 0;
+      currentId = data.currentId || assessments[0]?.id;
+    }
+  } catch(e){}
+  if(!rubric){ rubric = jsyaml.load(DEFAULT_YAML) }
+  if(assessments.length===0){ _newAssessment('Assessment 1') }
+  renderAll();
+}
+
+function _newAssessment(name){
+  const id = mkId();
+  assessments.push({id, name:name||'Assessment '+(assessments.length+1), meta:{student:'',project:'',assessor:''}, values:{}});
+  currentId = id;
+}
+
+function autosave(){
+  try {
+    localStorage.setItem('rubric_session', JSON.stringify({
+      yaml: currentYaml, assessments, aid:_aid, currentId
+    }));
+  } catch(e){}
+}
+
+// ═══════════════════════════════════════════════════════════
+//  SIDEBAR
+// ═══════════════════════════════════════════════════════════
+function renderSidebar(){
+  const list = document.getElementById('sb-list');
+  list.innerHTML = '';
+  assessments.forEach(a=>{
+    const d = document.createElement('div');
+    d.className = 'sb-item'+(a.id===currentId?' active':'');
+    d.innerHTML = `<span class="sb-name" title="${esc(a.name)}">${esc(a.name)}</span>
+      <input class="rename-inp" value="${esc(a.name)}"/>
+      <button class="icon-btn" title="Rename" onclick="event.stopPropagation();startRename('${a.id}',this)">✎</button>
+      <button class="icon-btn" title="Delete" onclick="event.stopPropagation();deleteAssessment('${a.id}')">✕</button>`;
+    d.querySelector('.sb-name').onclick = ()=>switchTo(a.id);
+    list.appendChild(d);
+  });
+}
+
+function startRename(id, btn){
+  const item = btn.closest('.sb-item');
+  const span = item.querySelector('.sb-name');
+  const inp  = item.querySelector('.rename-inp');
+  span.style.display='none'; inp.style.display='block'; inp.focus(); inp.select();
+  const done = ()=>{
+    const v = inp.value.trim()||span.textContent;
+    const a = assessments.find(x=>x.id===id);
+    if(a) a.name=v;
+    span.textContent=v; span.style.display=''; inp.style.display='none';
+    if(id===currentId) document.getElementById('tb-sub').textContent=v;
+    autosave(); renderSidebar();
+  };
+  inp.onblur=done; inp.onkeydown=e=>{ if(e.key==='Enter') inp.blur() };
+}
+
+function switchTo(id){
+  if(id===currentId) return;
+  currentId=id; renderAll(); autosave();
+}
+
+function newAssessment(){
+  _newAssessment(); renderAll(); autosave();
+}
+
+function duplicateCurrent(){
+  const src=cur(); if(!src) return;
+  const id=mkId();
+  assessments.push({id, name:src.name+' (copy)', meta:{...src.meta}, values:JSON.parse(JSON.stringify(src.values))});
+  currentId=id; renderAll(); autosave();
+}
+
+function deleteAssessment(id){
+  if(assessments.length===1&&!confirm('Delete the only assessment?')) return;
+  if(assessments.length>1&&!confirm('Delete this assessment?')) return;
+  assessments=assessments.filter(a=>a.id!==id);
+  if(currentId===id) currentId=assessments[0]?.id;
+  if(assessments.length===0) _newAssessment();
+  renderAll(); autosave();
+}
+
+// ═══════════════════════════════════════════════════════════
+//  TOPBAR + META
+// ═══════════════════════════════════════════════════════════
+function renderTopbar(){
+  const a=cur();
+  document.getElementById('tb-title').textContent = rubric?.title||'Rubric Tool';
+  document.getElementById('tb-sub').textContent   = a?.name||'';
+}
+
+function saveMeta(){
+  const a=cur(); if(!a) return;
+  a.meta.student  = document.getElementById('m-student').value;
+  a.meta.project  = document.getElementById('m-project').value;
+  a.meta.assessor = document.getElementById('m-assessor').value;
+  autosave();
+}
+
+function loadMeta(){
+  const a=cur();
+  document.getElementById('m-student').value  = a?.meta?.student||'';
+  document.getElementById('m-project').value  = a?.meta?.project||'';
+  document.getElementById('m-assessor').value = a?.meta?.assessor||'';
+}
+
+// ═══════════════════════════════════════════════════════════
+//  VALUE HELPERS
+// ═══════════════════════════════════════════════════════════
+function get(key, def){ return cur()?.values?.[key]??def }
+function set(key,val){ const a=cur(); if(a){ a.values[key]=val; } refreshOutput(); autosave(); }
+
+// ═══════════════════════════════════════════════════════════
+//  FORM RENDER
+// ═══════════════════════════════════════════════════════════
+function renderForm(){
+  const form = document.getElementById('sections-form');
+  const nav  = document.getElementById('nav-links');
+  form.innerHTML=''; nav.innerHTML='';
+  if(!rubric) return;
+
+  rubric.sections.forEach((sec,si)=>{
+    // section element
+    const secEl = document.createElement('div');
+    secEl.className='form-section'; secEl.id='sec-'+sec.id;
+    secEl.innerHTML='<h2>'+esc(sec.title)+'</h2>';
+    sec.fields.forEach(f=>{ secEl.appendChild(buildField(f)) });
+    form.appendChild(secEl);
+
+    // nav link
+    const lnk = document.createElement('div');
+    lnk.className='nav-link'+(si===0?' active':'');
+    lnk.textContent=sec.title;
+    lnk.onclick=()=>{
+      document.getElementById('sec-'+sec.id)?.scrollIntoView({behavior:'smooth',block:'start'});
+    };
+    nav.appendChild(lnk);
+  });
+
+  // scroll spy
+  const fa=document.getElementById('form-area');
+  fa.onscroll=()=>{
+    const links=nav.querySelectorAll('.nav-link');
+    rubric.sections.forEach((sec,i)=>{
+      const el=document.getElementById('sec-'+sec.id);
+      if(!el) return;
+      const rect=el.getBoundingClientRect();
+      if(rect.top<160&&rect.bottom>0){
+        links.forEach(l=>l.classList.remove('active'));
+        links[i]?.classList.add('active');
+      }
+    });
+  };
+}
+
+function buildField(f){
+  const wrap=document.createElement('div');
+  wrap.className='field-block';
+  let html=`<div class="field-label">${esc(f.label)}</div>`;
+  if(f.description) html+=`<div class="field-desc">${esc(f.description)}</div>`;
+
+  if(f.type==='slider'){
+    const v=get(f.id,f.min??0);
+    const max=f.points??f.max??0;
+    html+=`<div class="slider-wrap">
+      <input type="range" id="sl-${f.id}" min="${f.min??0}" max="${f.max??10}" step="${f.step??1}" value="${v}"/>
+      <span class="slider-readout" id="sr-${f.id}">${v} / ${max}</span>
+    </div><div class="slider-bounds"><span>${f.min??0}</span><span>${f.max??10}</span></div>`;
+  }
+  else if(f.type==='checkbox'){
+    const items=(f.items||[]);
+    html+='<div class="checkbox-grid">';
+    items.forEach((lbl,i)=>{
+      const key=f.id+'_'+i; const chk=get(key,false);
+      html+=`<div class="cb-item${chk?' checked':''}" id="cbi-${key}" onclick="toggleCb('${f.id}',${i},this)">
+        <input type="checkbox" id="cb-${key}" ${chk?'checked':''}/>
+        <label for="cb-${key}">${esc(lbl)}</label></div>`;
+    });
+    html+='</div>';
+  }
+  else if(f.type==='radio'){
+    const cur_v=get(f.id,null);
+    html+='<div class="radio-list" id="rl-'+f.id+'">';
+    (f.points||[]).forEach((opt,i)=>{
+      const sel=cur_v===opt.value;
+      html+=`<div class="radio-opt${sel?' selected':''}" onclick="pickRadio('${f.id}',${opt.value},this.closest('.radio-list'))">
+        <input type="radio" name="r-${f.id}" value="${opt.value}" ${sel?'checked':''}/>
+        <label>${esc(opt.label)}</label>
+        <span class="radio-pts">${opt.value} pt${opt.value!==1?'s':''}</span></div>`;
+    });
+    html+='</div>';
+  }
+  else if(f.type==='checklist'){
+    const neg=f.negative||[]; const pos=f.positive||[];
+    const negNote=get(f.id+'__neg_note','');
+    const posNote=get(f.id+'__pos_note','');
+    html+='<div class="checklist-cols"><div class="cl-col">';
+    html+='<div class="cl-head neg">To improve</div>';
+    neg.forEach((t,i)=>{
+      const k=f.id+'__neg__'+i; const chk=get(k,false);
+      html+=`<div class="cl-check neg${chk?' checked':''}" id="clc-${k}" onclick="toggleCl('${f.id}','neg',${i},this)">
+        <input type="checkbox" ${chk?'checked':''}/><label>– ${esc(t)}</label></div>`;
+    });
+    html+=`<div class="cl-note"><input class="text-inp" id="cln-neg-${f.id}" placeholder="Add note…" value="${esc(negNote)}"
+      oninput="set('${f.id}__neg_note',this.value)"/></div>`;
+    html+=`<div class="cl-add"><input id="cla-neg-${f.id}" placeholder="Add negative point…"/>
+      <button onclick="addClItem('${f.id}','neg')">Add</button></div>`;
+    html+='</div><div class="cl-col">';
+    html+='<div class="cl-head pos">Well done</div>';
+    pos.forEach((t,i)=>{
+      const k=f.id+'__pos__'+i; const chk=get(k,false);
+      html+=`<div class="cl-check pos${chk?' checked':''}" id="clc-${k}" onclick="toggleCl('${f.id}','pos',${i},this)">
+        <input type="checkbox" ${chk?'checked':''}/><label>+ ${esc(t)}</label></div>`;
+    });
+    html+=`<div class="cl-note"><input class="text-inp" id="cln-pos-${f.id}" placeholder="Add note…" value="${esc(posNote)}"
+      oninput="set('${f.id}__pos_note',this.value)"/></div>`;
+    html+=`<div class="cl-add"><input id="cla-pos-${f.id}" placeholder="Add positive point…"/>
+      <button onclick="addClItem('${f.id}','pos')">Add</button></div>`;
+    html+='</div></div>';
+  }
+  else if(f.type==='textarea'){
+    const v=get(f.id,'');
+    html+=`<textarea class="text-inp" id="ti-${f.id}" placeholder="${esc(f.placeholder||'')}"
+      oninput="set('${f.id}',this.value)">${esc(v)}</textarea>`;
+  }
+  else { // text
+    const v=get(f.id,'');
+    html+=`<input class="text-inp" id="ti-${f.id}" placeholder="${esc(f.placeholder||'')}"
+      value="${esc(v)}" oninput="set('${f.id}',this.value)"/>`;
+  }
+
+  wrap.innerHTML=html;
+  // attach slider event (needs DOM node)
+  if(f.type==='slider'){
+    const sl=wrap.querySelector('input[type=range]');
+    const sr=wrap.querySelector('.slider-readout');
+    const max=f.points??f.max??0;
+    sl.addEventListener('input',()=>{
+      const v=parseInt(sl.value);
+      sr.textContent=v+' / '+max;
+      set(f.id,v);
+    });
+  }
+  return wrap;
+}
+
+// ═══════════════════════════════════════════════════════════
+//  FIELD INTERACTION
+// ═══════════════════════════════════════════════════════════
+function toggleCb(fid,idx,el){
+  const k=fid+'_'+idx; const now=!get(k,false);
+  set(k,now);
+  el.classList.toggle('checked',now);
+  el.querySelector('input').checked=now;
+}
+
+function pickRadio(fid,val,list){
+  set(fid,val);
+  list.querySelectorAll('.radio-opt').forEach(o=>{
+    const isMe=parseFloat(o.querySelector('input').value)===val;
+    o.classList.toggle('selected',isMe);
+    o.querySelector('input').checked=isMe;
+  });
+}
+
+function toggleCl(fid,side,idx,el){
+  const k=fid+'__'+side+'__'+idx; const now=!get(k,false);
+  set(k,now);
+  el.classList.toggle('checked',now);
+  el.querySelector('input').checked=now;
+}
+
+function addClItem(fid,side){
+  const inp=document.getElementById('cla-'+side+'-'+fid);
+  const txt=inp.value.trim(); if(!txt) return; inp.value='';
+  // add to rubric definition
+  for(const sec of rubric.sections){
+    const f=sec.fields.find(x=>x.id===fid); if(!f) continue;
+    const arr=side==='neg'?(f.negative||(f.negative=[])):(f.positive||(f.positive=[]));
+    const idx=arr.length; arr.push(txt);
+    // insert DOM node before add-row
+    const col=inp.closest('.cl-col');
+    const addRow=inp.closest('.cl-add');
+    const div=document.createElement('div');
+    const k=fid+'__'+side+'__'+idx;
+    div.className='cl-check '+side;
+    div.id='clc-'+k;
+    div.onclick=function(){ toggleCl(fid,side,idx,this) };
+    div.innerHTML=`<input type="checkbox"/><label>${side==='neg'?'– ':'+ '}${esc(txt)}</label>`;
+    col.insertBefore(div,addRow);
+    break;
+  }
+  refreshOutput(); autosave();
+}
+
+// ═══════════════════════════════════════════════════════════
+//  OUTPUT
+// ═══════════════════════════════════════════════════════════
+function computePoints(){
+  let earned=0,max=0;
+  if(!rubric) return {earned,max};
+  for(const sec of rubric.sections){
+    for(const f of sec.fields){
+      if(f.type==='slider'){
+        const v=get(f.id,f.min??0);
+        const pts=f.points??f.max??0;
+        earned+=Number(v); max+=pts;
+      }else if(f.type==='checkbox'){
+        const ppi=f.points_per_item??1;
+        (f.items||[]).forEach((_,i)=>{ if(get(f.id+'_'+i,false)){ earned+=ppi } });
+        max+=(f.items||[]).length*ppi;
+      }else if(f.type==='radio'){
+        const v=get(f.id,null);
+        const maxV=Math.max(...(f.points||[]).map(p=>p.value),0);
+        if(v!==null) earned+=Number(v);
+        max+=maxV;
+      }else if(f.type==='checklist'){
+        const ppp=f.points_per_positive??1;
+        (f.positive||[]).forEach((_,i)=>{ if(get(f.id+'__pos__'+i,false)) earned+=ppp });
+        max+=(f.positive||[]).length*ppp;
+      }
+    }
+  }
+  return {earned,max};
+}
+
+function refreshOutput(){
+  const a=cur(); if(!a||!rubric) return;
+  const lines=[];
+  const date=new Date().toLocaleDateString('nl-NL');
+
+  lines.push('# '+rubric.title+(rubric.course?' ('+rubric.course+')':''));
+  if(a.meta.student) lines.push('Student: '+a.meta.student);
+  if(a.meta.project) lines.push('Project: '+a.meta.project);
+  if(a.meta.assessor) lines.push('Assessor: '+a.meta.assessor);
+  lines.push('Date: '+date);
+
+  for(const sec of rubric.sections){
+    lines.push(''); lines.push('# '+sec.title);
+    for(const f of sec.fields){
+      if(f.type==='slider'){
+        const v=get(f.id,f.min??0);
+        const max=f.points??f.max??0;
+        lines.push(f.label+': '+v+' / '+max);
+      }else if(f.type==='checkbox'){
+        const checked=(f.items||[]).filter((_,i)=>get(f.id+'_'+i,false));
+        if(checked.length) lines.push(f.label+': '+checked.join(', '));
+      }else if(f.type==='radio'){
+        const v=get(f.id,null);
+        if(v!==null){
+          const opt=(f.points||[]).find(p=>p.value===v);
+          lines.push(f.label+': '+( opt?.label||v ));
+        }
+      }else if(f.type==='checklist'){
+        const posChecked=(f.positive||[]).filter((_,i)=>get(f.id+'__pos__'+i,false));
+        const negChecked=(f.negative||[]).filter((_,i)=>get(f.id+'__neg__'+i,false));
+        if(posChecked.length||negChecked.length){
+          lines.push(f.label+':');
+          posChecked.forEach(t=>lines.push('  + '+t));
+          negChecked.forEach(t=>lines.push('  – '+t));
+        }
+        const negNote=get(f.id+'__neg_note',''); const posNote=get(f.id+'__pos_note','');
+        if(negNote) lines.push('  Note: '+negNote);
+        if(posNote) lines.push('  Note: '+posNote);
+      }else if(f.type==='text'||f.type==='textarea'){
+        const v=get(f.id,''); if(v) lines.push(f.label+': '+v);
+      }
+    }
+  }
+
+  const {earned,max}=computePoints();
+  if(rubric.grading&&max>0){
+    const dec=rubric.grade_decimals??1;
+    const grade=(1+9*(earned/max)).toFixed(dec);
+    lines.push(''); lines.push('---');
+    lines.push('Points: '+earned+' / '+max);
+    lines.push('Grade (EU 1–10): '+grade);
+    const pill=document.getElementById('grade-pill');
+    pill.textContent='Grade: '+grade; pill.style.display='';
+  }
+
+  document.getElementById('output-pre').textContent=lines.join('\n');
+}
+
+function copyOutput(){
+  const text=document.getElementById('output-pre').textContent;
+  navigator.clipboard.writeText(text).then(()=>toast('Copied!'));
+}
+
+function downloadMd(){
+  const text=document.getElementById('output-pre').textContent;
+  const name=(cur()?.meta?.student||'assessment').replace(/\s+/g,'-').toLowerCase();
+  const blob=new Blob([text],{type:'text/markdown'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a'); a.href=url; a.download=name+'.md'; a.click();
+  URL.revokeObjectURL(url);
+}
+
+// ═══════════════════════════════════════════════════════════
+//  EDITOR MODAL
+// ═══════════════════════════════════════════════════════════
+function openEditor(){
+  document.getElementById('editor-ta').value=currentYaml;
+  document.getElementById('editor-err').className='';
+  document.getElementById('editor-err').textContent='';
+  document.getElementById('editor-overlay').classList.add('open');
+}
+function closeEditor(){ document.getElementById('editor-overlay').classList.remove('open') }
+function applyRubric(){
+  const yaml=document.getElementById('editor-ta').value;
+  try{
+    const parsed=jsyaml.load(yaml);
+    if(!parsed?.sections) throw new Error('No "sections" key found');
+    rubric=parsed; currentYaml=yaml;
+    renderAll(); closeEditor();
+    toast('Rubric applied');
+  }catch(e){
+    const err=document.getElementById('editor-err');
+    err.textContent='⚠ '+e.message; err.className='show';
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+//  SAVE / LOAD SESSION FILE
+// ═══════════════════════════════════════════════════════════
+function saveSession(){
+  const payload=JSON.stringify({yaml:currentYaml,assessments,aid:_aid,currentId},null,2);
+  const blob=new Blob([payload],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a'); a.href=url; a.download='rubric-session.json'; a.click();
+  URL.revokeObjectURL(url); toast('Session saved');
+}
+
+function loadSession(){
+  const inp=document.createElement('input'); inp.type='file'; inp.accept='.json,.yaml,.yml';
+  inp.onchange=async e=>{
+    const file=e.target.files[0]; if(!file) return;
+    const text=await file.text();
+    try{
+      if(file.name.endsWith('.json')){
+        const data=JSON.parse(text);
+        if(data.yaml){ currentYaml=data.yaml; rubric=jsyaml.load(currentYaml) }
+        if(data.assessments){ assessments=data.assessments; _aid=data.aid||0 }
+        currentId=data.currentId||assessments[0]?.id;
+        if(assessments.length===0) _newAssessment();
+      }else{
+        // load as rubric YAML
+        rubric=jsyaml.load(text); currentYaml=text;
+      }
+      renderAll(); autosave(); toast('Loaded');
+    }catch(e){ alert('Load error: '+e.message) }
+  };
+  inp.click();
+}
+
+// ═══════════════════════════════════════════════════════════
+//  LOAD RUBRIC FROM SERVER (same origin, relative path)
+// ═══════════════════════════════════════════════════════════
+// Change SERVER_RUBRIC_URL to match your hosted YAML filename.
+// A relative path works on any host (GitHub Pages, Netlify, etc.)
+const SERVER_RUBRIC_URL = 'rubric-social-robot-design.yaml';
+
+async function loadServerRubric(){
+  const btn = document.getElementById('btn-server');
+  const status = document.getElementById('server-status');
+  btn.classList.add('loading');
+  btn.textContent = '⇩ Fetching…';
+  status.className = '';
+  status.textContent = '';
+  try {
+    const res = await fetch(SERVER_RUBRIC_URL, {cache:'no-cache'});
+    if(!res.ok) throw new Error(`HTTP ${res.status} — ${res.statusText}`);
+    const text = await res.text();
+    const parsed = jsyaml.load(text);
+    if(!parsed?.sections) throw new Error('No "sections" key found in YAML');
+    rubric = parsed;
+    currentYaml = text;
+    renderAll();
+    autosave();
+    const ts = new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+    status.textContent = `✓ Loaded from server ${ts}`;
+    status.className = 'ok';
+    toast('Server rubric loaded & saved locally');
+  } catch(e) {
+    status.textContent = '✗ ' + e.message;
+    status.className = 'err';
+    toast('Failed to load server rubric');
+  } finally {
+    btn.classList.remove('loading');
+    btn.textContent = '⇩ Load server rubric';
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+//  UTILS
+// ═══════════════════════════════════════════════════════════
+function esc(s){ return s==null?'':String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;') }
+
+function toast(msg){
+  const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),1800);
+}
+
+// ═══════════════════════════════════════════════════════════
+//  RENDER ALL
+// ═══════════════════════════════════════════════════════════
+function renderAll(){
+  renderSidebar(); renderTopbar(); loadMeta(); renderForm(); refreshOutput();
+}
+
+// close modal on backdrop click
+document.getElementById('editor-overlay').addEventListener('click',e=>{ if(e.target===e.currentTarget) closeEditor() });
+
+init();
+</script>
+</body>
+</html>
