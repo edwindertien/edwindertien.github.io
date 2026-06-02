@@ -1273,7 +1273,7 @@ function cur(){ return assessments.find(a=>a.id===currentId) }
 function init(){
   // try to load from localStorage
   try {
-    const saved = localStorage.getItem('rubric_session');
+    const saved = localStorage.getItem('rubric_session_srd');
     if(saved){
       const data = JSON.parse(saved);
       currentYaml = data.yaml || DEFAULT_YAML;
@@ -1296,7 +1296,7 @@ function _newAssessment(name){
 
 function autosave(){
   try {
-    localStorage.setItem('rubric_session', JSON.stringify({
+    localStorage.setItem('rubric_session_srd', JSON.stringify({
       yaml: currentYaml, assessments, aid:_aid, currentId
     }));
   } catch(e){}
