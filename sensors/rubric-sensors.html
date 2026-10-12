@@ -1,0 +1,1480 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Sensors A3 Rubric Tool</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/4.1.0/js-yaml.min.js"></script>
+<style>
+/* ── RESET & BASE ── */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;font-size:14px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;background:#f0f0f0;color:#1a1a1a}
+
+/* ── LAYOUT ── */
+#shell{display:flex;height:100vh;overflow:hidden}
+
+/* left sidebar */
+#sidebar{width:210px;min-width:210px;background:#fff;border-right:1px solid #ddd;display:flex;flex-direction:column;overflow:hidden}
+#sb-head{padding:12px 14px 8px;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#888;border-bottom:1px solid #eee}
+#sb-list{flex:1;overflow-y:auto}
+.sb-item{display:flex;align-items:center;padding:8px 14px;gap:4px;cursor:pointer;border-left:3px solid transparent}
+.sb-item:hover{background:#f5f5f5}
+.sb-item.active{background:#e8f0fa;border-left-color:#2060c0;color:#1a50a0}
+.sb-item .sb-name{flex:1;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sb-item input.rename-inp{flex:1;font-size:13px;border:none;outline:none;background:transparent;display:none}
+.icon-btn{background:none;border:none;cursor:pointer;padding:2px 3px;border-radius:3px;color:#aaa;font-size:13px;line-height:1;flex-shrink:0}
+.icon-btn:hover{color:#333;background:#eee}
+#sb-actions{padding:10px;border-top:1px solid #eee;display:grid;grid-template-columns:1fr 1fr;gap:6px}
+#sb-actions button{font-size:12px;padding:7px 4px;border:1px solid #ccc;background:#fff;border-radius:5px;cursor:pointer;text-align:center}
+#sb-actions button:hover{background:#f0f0f0}
+#sb-actions .full{grid-column:span 2}
+#btn-server{background:#e8f0fa;border-color:#aac4e8;color:#1a5fa8;font-weight:600}
+#btn-server:hover{background:#d4e5f7}
+#btn-server.loading{opacity:.6;pointer-events:none}
+#server-status{font-size:11px;padding:4px 10px;text-align:center;border-top:1px solid #eee;color:#888;display:none}
+#server-status.ok{color:#217a3c;background:#e6f5ec;display:block}
+#server-status.err{color:#c0392b;background:#fdecea;display:block}
+
+/* main */
+#main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
+
+/* topbar */
+#topbar{height:52px;background:#fff;border-bottom:1px solid #ddd;display:flex;align-items:center;padding:0 20px;gap:16px;flex-shrink:0}
+#tb-left{width:140px;flex-shrink:0}
+#tb-center{flex:1;text-align:center}
+#tb-title{font-size:15px;font-weight:700}
+#tb-sub{font-size:12px;color:#888;margin-top:1px}
+#tb-right{width:140px;display:flex;justify-content:flex-end;gap:8px;align-items:center}
+.grade-pill{font-size:13px;font-weight:700;padding:4px 12px;border-radius:20px;background:#e8f0fa;color:#1a50a0;display:none}
+.btn{font-size:12px;padding:6px 14px;border:1px solid #bbb;background:#fff;border-radius:5px;cursor:pointer;white-space:nowrap}
+.btn:hover{background:#f0f0f0}
+.btn.primary{background:#1a5fa8;color:#fff;border-color:#1a5fa8}
+.btn.primary:hover{background:#1550a0}
+
+/* content split */
+#content{flex:1;display:flex;overflow:hidden}
+#form-area{flex:1;overflow-y:auto;padding:20px 28px 40px}
+#sections-nav{width:190px;min-width:190px;background:#fff;border-left:1px solid #ddd;padding:14px 0;overflow-y:auto}
+#sections-nav h3{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#888;padding:0 16px 8px}
+.nav-link{display:block;padding:6px 16px;font-size:13px;color:#555;cursor:pointer;border-left:3px solid transparent;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.nav-link:hover{color:#1a1a1a;background:#f5f5f5}
+.nav-link.active{color:#1a5fa8;border-left-color:#1a5fa8;background:#e8f0fa;font-weight:500}
+
+/* ── META BAR ── */
+#meta-bar{background:#fff;border:1px solid #ddd;border-radius:6px;padding:12px 16px;margin-bottom:20px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+.meta-field label{display:block;font-size:11px;font-weight:600;color:#777;letter-spacing:.05em;text-transform:uppercase;margin-bottom:4px}
+.meta-field input{width:100%;padding:7px 10px;border:1px solid #ddd;border-radius:4px;font-size:13px;font-family:inherit}
+.meta-field input:focus{outline:none;border-color:#1a5fa8}
+
+/* ── SECTIONS ── */
+.form-section{margin-bottom:28px;scroll-margin-top:20px}
+.form-section>h2{font-size:20px;font-weight:700;padding-bottom:10px;border-bottom:2px solid #eee;margin-bottom:16px}
+
+/* ── FIELD BLOCK ── */
+.field-block{margin-bottom:18px}
+.field-label{font-size:13px;font-weight:700;margin-bottom:4px}
+.field-desc{font-size:12px;color:#888;margin-bottom:6px}
+
+/* slider */
+.slider-wrap{display:flex;align-items:center;gap:12px}
+.slider-wrap input[type=range]{flex:1;height:6px;-webkit-appearance:none;appearance:none;background:#ddd;border-radius:3px;outline:none;cursor:pointer}
+.slider-wrap input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:#1a5fa8;cursor:pointer}
+.slider-wrap input[type=range]::-moz-range-thumb{width:20px;height:20px;border:none;border-radius:50%;background:#1a5fa8;cursor:pointer}
+.slider-readout{font-size:13px;font-weight:700;min-width:48px;text-align:right;color:#1a5fa8}
+.slider-bounds{display:flex;justify-content:space-between;font-size:11px;color:#aaa;margin-top:2px;padding:0 0}
+
+/* checkbox grid */
+.checkbox-grid{display:flex;flex-wrap:wrap;gap:6px}
+.cb-item{display:flex;align-items:center;gap:6px;padding:5px 10px;border:1px solid #ddd;border-radius:4px;cursor:pointer;user-select:none}
+.cb-item:hover{background:#f5f5f5}
+.cb-item.checked{background:#e8f0fa;border-color:#1a5fa8}
+.cb-item input{accent-color:#1a5fa8;cursor:pointer}
+.cb-item label{font-size:13px;cursor:pointer}
+
+/* radio */
+.radio-list{display:flex;flex-direction:column;gap:5px}
+.radio-opt{display:flex;align-items:center;gap:8px;padding:7px 12px;border:1px solid #ddd;border-radius:4px;cursor:pointer;user-select:none}
+.radio-opt:hover{background:#f5f5f5}
+.radio-opt.selected{background:#e8f0fa;border-color:#1a5fa8}
+.radio-opt input{accent-color:#1a5fa8;cursor:pointer}
+.radio-opt label{flex:1;font-size:13px;cursor:pointer}
+.radio-pts{font-size:11px;color:#aaa}
+
+/* checklist two-column */
+.checklist-cols{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.cl-col{display:flex;flex-direction:column;gap:4px}
+.cl-head{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:4px 8px;border-radius:3px;margin-bottom:2px}
+.cl-head.neg{color:#c0392b;background:#fdecea}
+.cl-head.pos{color:#217a3c;background:#e6f5ec}
+.cl-check{display:flex;align-items:flex-start;gap:7px;padding:6px 9px;border:1px solid #ddd;border-radius:4px;cursor:pointer;user-select:none;line-height:1.35}
+.cl-check:hover{background:#f8f8f8}
+.cl-check.checked.neg{background:#fdecea;border-color:#e88}
+.cl-check.checked.pos{background:#e6f5ec;border-color:#6b6}
+.cl-check input{accent-color:#1a5fa8;cursor:pointer;flex-shrink:0;margin-top:2px}
+.cl-check label{font-size:12px;cursor:pointer}
+.cl-note{margin-top:4px}
+.cl-note input{width:100%;padding:6px 9px;border:1px solid #ddd;border-radius:4px;font-size:12px;font-family:inherit}
+.cl-note input:focus{outline:none;border-color:#1a5fa8}
+.cl-add{display:flex;gap:4px;margin-top:4px}
+.cl-add input{flex:1;padding:5px 9px;border:1px solid #ddd;border-radius:4px;font-size:12px;font-family:inherit;color:#aaa}
+.cl-add input:focus{outline:none;border-color:#1a5fa8;color:#1a1a1a}
+.cl-add button{padding:5px 10px;border:1px solid #bbb;background:#fff;border-radius:4px;font-size:12px;cursor:pointer}
+.cl-add button:hover{background:#f0f0f0}
+
+/* text / textarea */
+.text-inp{width:100%;padding:7px 10px;border:1px solid #ddd;border-radius:4px;font-size:13px;font-family:inherit}
+.text-inp:focus{outline:none;border-color:#1a5fa8}
+textarea.text-inp{resize:vertical;min-height:64px;line-height:1.5}
+
+/* ── OUTPUT ── */
+#output-wrap{background:#fff;border:1px solid #ddd;border-radius:6px;margin-top:4px}
+#output-head{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;border-bottom:1px solid #eee}
+#output-head h3{font-size:15px;font-weight:700}
+#output-btns{display:flex;gap:6px}
+#output-pre{font-family:'Cascadia Code','Fira Mono','Courier New',monospace;font-size:12px;line-height:1.65;white-space:pre-wrap;word-break:break-word;padding:14px 16px;max-height:380px;overflow-y:auto;color:#222;background:#fafafa;border-radius:0 0 6px 6px}
+
+/* ── EDITOR MODAL ── */
+#editor-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;align-items:center;justify-content:center}
+#editor-overlay.open{display:flex}
+#editor-box{background:#fff;border-radius:8px;width:min(860px,96vw);max-height:92vh;display:flex;flex-direction:column;box-shadow:0 12px 48px rgba(0,0,0,.22)}
+#editor-box header{display:flex;align-items:center;justify-content:space-between;padding:12px 18px;border-bottom:1px solid #eee}
+#editor-box header h2{font-size:15px;font-weight:700}
+#editor-hint{font-size:12px;color:#888;padding:8px 18px;border-bottom:1px solid #eee;background:#fffbe6}
+#editor-ta{flex:1;resize:none;border:none;outline:none;font-family:'Cascadia Code','Fira Mono','Courier New',monospace;font-size:12px;padding:14px 18px;min-height:440px;background:#fafaf8;color:#1a1a1a;overflow-y:auto}
+#editor-err{font-size:12px;color:#c0392b;padding:6px 18px;display:none}
+#editor-err.show{display:block}
+#editor-foot{display:flex;justify-content:flex-end;gap:8px;padding:10px 18px;border-top:1px solid #eee}
+
+/* ── TOAST ── */
+#toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1a1a1a;color:#fff;padding:8px 20px;border-radius:20px;font-size:13px;opacity:0;pointer-events:none;transition:opacity .2s;z-index:999}
+#toast.show{opacity:1}
+
+@media(max-width:680px){
+  #sidebar,#sections-nav{display:none}
+  #meta-bar{grid-template-columns:1fr}
+  .checklist-cols{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<div id="shell">
+
+  <!-- ══ LEFT SIDEBAR ══ -->
+  <div id="sidebar">
+    <div id="sb-head">Assessments</div>
+    <div id="sb-list"></div>
+    <div id="sb-actions">
+      <button class="full" onclick="newAssessment()">+ New</button>
+      <button onclick="duplicateCurrent()">⧉ Duplicate</button>
+      <button onclick="saveSession()">↓ Save</button>
+      <button onclick="loadSession()">↑ Load</button>
+      <button class="full" id="btn-server" onclick="loadServerRubric()">⇩ Load server rubric</button>
+    </div>
+    <div id="server-status"></div>
+  </div>
+
+  <!-- ══ MAIN ══ -->
+  <div id="main">
+
+    <!-- topbar -->
+    <div id="topbar">
+      <div id="tb-left">
+        <button class="btn" onclick="openEditor()">✎ Edit rubric</button>
+      </div>
+      <div id="tb-center">
+        <div id="tb-title">—</div>
+        <div id="tb-sub"></div>
+      </div>
+      <div id="tb-right">
+        <span id="grade-pill" class="grade-pill"></span>
+      </div>
+    </div>
+
+    <!-- form + sections nav -->
+    <div id="content">
+      <div id="form-area">
+
+        <!-- student meta -->
+        <div id="meta-bar">
+          <div class="meta-field">
+            <label>Student name(s)</label>
+            <input id="m-student" placeholder="e.g. Mara de Vries" oninput="saveMeta();refreshOutput()"/>
+          </div>
+          <div class="meta-field">
+            <label>Project / submission</label>
+            <input id="m-project" placeholder="e.g. Group 7 - Assignment 3" oninput="saveMeta();refreshOutput()"/>
+          </div>
+          <div class="meta-field">
+            <label>Assessor</label>
+            <input id="m-assessor" placeholder="Your name" oninput="saveMeta();refreshOutput()"/>
+          </div>
+        </div>
+
+        <div id="sections-form"></div>
+
+        <!-- generated output -->
+        <div id="output-wrap">
+          <div id="output-head">
+            <h3>Generated Assessment</h3>
+            <div id="output-btns">
+              <button class="btn" onclick="copyOutput()">Copy</button>
+              <button class="btn" onclick="downloadMd()">Download .md</button>
+            </div>
+          </div>
+          <pre id="output-pre"></pre>
+        </div>
+
+      </div>
+      <div id="sections-nav">
+        <h3>Sections</h3>
+        <div id="nav-links"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ EDITOR MODAL ══ -->
+<div id="editor-overlay">
+  <div id="editor-box">
+    <header>
+      <h2>Rubric definition (YAML)</h2>
+      <button class="icon-btn" style="font-size:18px" onclick="closeEditor()">✕</button>
+    </header>
+    <div id="editor-hint">
+      Paste your rubric YAML here and click <strong>Apply</strong> to regenerate the form.
+      Field types: <code>slider</code> · <code>checkbox</code> · <code>radio</code> · <code>checklist</code> · <code>text</code> · <code>textarea</code>
+    </div>
+    <textarea id="editor-ta" spellcheck="false"></textarea>
+    <div id="editor-err"></div>
+    <div id="editor-foot">
+      <button class="btn" onclick="closeEditor()">Cancel</button>
+      <button class="btn primary" onclick="applyRubric()">Apply rubric</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════════════════════
+//  DEFAULT RUBRIC YAML
+// ═══════════════════════════════════════════════════════════
+const DEFAULT_YAML = `# ══════════════════════════════════════════════════════════════════
+#  RUBRIC DEFINITION - Sensors for Creative Technology
+#  Assignment 3: Resistive Sensing (A101 foil sensor vs. load cell)
+#  ──────────────────────────────────────────────────────────────────
+#  Total points: 30
+#  EU grade: 1 + 9 x (earned / 30)
+#
+#  1. Introduction         3 pt  (1+1+1)
+#  2. Analysis             7 pt  (1+1+1+2+2)
+#  3. Method & setup       6 pt  (1+2+1+1+1)
+#  4. Results              5 pt  (1+1+1+1+1)
+#  5. Conclusion           6 pt  (1+1+1+1+1+1)
+#  6. Format & structure   3 pt  (2+1)
+#
+#  Every criterion = one slider (the points) + one observation
+#  checklist (points_per_positive: 0, so it only generates feedback
+#  text and never changes the score).
+#  Use the notes under the checklist for the Canvas 'Comment' field.
+# ══════════════════════════════════════════════════════════════════
+
+title: "Sensors - Resistive Sensing (Assignment 3)"
+course: "SCT-A3"
+grading: true
+grade_decimals: 1
+
+sections:
+
+  # ════════════════════════════════════════════════════════════════
+  # 1. INTRODUCTION  ·  3 pt  (1+1+1)
+  # ════════════════════════════════════════════════════════════════
+  - id: intro
+    title: "introduction"
+    fields:
+
+      - id: intro_type
+        label: "introduction - sensor type (1 pt)"
+        type: slider
+        min: 0
+        max: 1
+        step: 1
+        points: 1
+        description: "Is the correct sensor type mentioned? (A101 piezoresistive foil force sensor, calibrated against a strain-gauge load cell.)"
+
+      - id: intro_type_obs
+        label: "observations"
+        type: checklist
+        points_per_positive: 0
+        negative:
+          - "sensor type missing or vague (only 'a pressure sensor')"
+          - "only one of the two sensors named"
+          - "wrong sensor type (e.g. capacitive, or load cell called a foil sensor)"
+        positive:
+          - "foil sensor named as piezoresistive force sensor (A101 / FlexiForce)"
+          - "load cell named as strain-gauge based reference"
+
+      - id: intro_principle
+        label: "introduction - physical principle (1 pt)"
+        type: slider
+        min: 0
+        max: 1
+        step: 1
+        points: 1
+        description: "Is the physical measurement principle mentioned?"
+
+      - id: intro_principle_obs
+        label: "observations"
+        type: checklist
+        points_per_positive: 0
+        negative:
+          - "no physical principle mentioned"
+          - "principle given for only one of the two sensors"
+          - "describes the electronics or the process instead of the physics"
+        positive:
+          - "piezoresistive effect: applied force changes the resistance of the foil"
+          - "strain-gauge / bridge principle mentioned for the reference"
+
+      - id: intro_goal
+        label: "introduction - measurement goal (1 pt)"
+        type: slider
+        min: 0
+        max: 1
+        step: 1
+        points: 1
+        description: "Is the goal clearly stated, without irrelevant (process-related) information?"
+
+      - id: intro_goal_obs
+        label: "observations"
+        type: checklist
+        points_per_positive: 0
+        negative:
+          - "goal missing or unclear"
+          - "goal buried in a description of what was done or which hardware was handed out"
+          - "goal is only 'to do the assignment'"
+        positive:
+          - "goal stated in one or two sentences (calibrate and characterise the A101 against the load cell)"
+          - "properties to be determined are named (range, resolution, precision, accuracy, hysteresis)"
+
+  # ════════════════════════════════════════════════════════════════
+  # 2. ANALYSIS  ·  7 pt  (1+1+1+2+2)
+  # ════════════════════════════════════════════════════════════════
+  - id: analysis
+    title: "analysis"
+    fields:
+
+      - id: an_measurand
+        label: "analysis - measurand (1 pt)"
+        type: slider
+        min: 0
+        max: 1
+        step: 1
+        points: 1
+        description: "It is clearly described what is measured: which physical quantity and in which units. Reference: force on the sensing area, read out as equivalent mass in g (500 g is about 4.9 N)."
+
+      - id: an_measurand_obs
+        label: "observations"
+        type: checklist
+        points_per_positive: 0
+        negative:
+          - "measurand not named"
+          - "force, mass and pressure mixed up (N, g, Pa)"
+          - "only raw ADC counts or volts, no physical unit"
+          - "units inconsistent between text and graphs"
+        positive:
+          - "measurand named explicitly (force)"
+          - "unit stated, with the g-to-N relation where relevant (1 g is about 9.81 mN)"
+          - "same units used throughout text and graphs"
+
+      - id: an_principle
+        label: "analysis - physical principle (1 pt)"
+        type: slider
+        min: 0
+        max: 1
+        step: 1
+        points: 1
+        description: "The physical principle used for the sensor is described concisely and correctly. Note: much of this text is pre-filled in the template, so look for the student's own explanation of the mechanism."
+
+      - id: an_principle_obs
+        label: "observations"
+        type: checklist
+        points_per_positive: 0
+        negative:
+          - "only the pre-filled template text, no own explanation"
+          - "FSR behaviour described wrongly (e.g. resistance increases with force)"
+          - "strain gauge / Wheatstone bridge not explained"
+          - "not concise (copied datasheet text)"
+        positive:
+          - "resistance drops with force; conductance is closer to linear (motivates the 1/x calibration)"
+          - "strain gauge: strain gives a resistance change, the bridge gives a small differential voltage"
+          - "concise and correct"
+
+      - id: an_reference
+        label: "analysis - the reference (1 pt)"
+        type: slider
+        min: 0
+        max: 1
+        step: 1
+        points: 1
+        description: "The reference used to calibrate the sensor of interest is discussed, including its operating principle. Reference values: single-point 780 g load cell, 4 strain gauges in a bridge on an aluminium yoke, 0.8 mV/V, 780 g maximum."
+
+      - id: an_reference_obs
+        label: "observations"
+        type: checklist
+        points_per_positive: 0
+        negative:
+          - "reference mentioned but operating principle not explained"
+          - "load cell specifications missing or wrong (sensitivity, maximum load)"
+          - "no reason given why the load cell is the better (more linear) sensor"
+          - "no discussion of how the reference itself was calibrated"
+        positive:
+          - "bridge of 4 strain gauges on an aluminium yoke explained"
+          - "specifications quoted correctly with source (0.8 mV/V, 780 g)"
+          - "reference limitations mentioned (datasheet non-linearity, hysteresis, zero balance)"
+
+      - id: an_equations
+        label: "analysis - relevant equations (2 pt)"
+        type: slider
+        min: 0
+        max: 2
+        step: 1
+        points: 2
+        description: "The equations from physical quantity, to electrical signal (voltage), to value in SI units (software), for both the sensor and the reference. Reference values: R_foil = R_pullup / (5 V / V_adc - 1); gain G = 5 + 200 kOhm / R_G = 2005; 0.8 mV/V x 5 V / 780 g = about 5.1 uV/g, so about 10 mV/g at the ADC (about 2 counts/g)."
+
+      - id: an_equations_obs
+        label: "observations"
+        type: checklist
+        points_per_positive: 0
+        negative:
+          - "no chain from force to voltage to ADC count to value in g"
+          - "equations only for one of the two sensors"
+          - "voltage-divider formula wrong or inconsistent with the schematic (resistor numbering)"
+          - "INA122 gain formula missing or wrong"
+          - "ADC conversion (5 V over 1024 counts) missing"
+          - "calibration function not given or not motivated"
+          - "template placeholders left empty (mV/g, gain, etc.)"
+        positive:
+          - "divider equation for R_foil correct and consistent with the schematic"
+          - "INA122 gain computed from the gain resistor (2005 for 100 Ohm)"
+          - "load cell sensitivity chain worked out down to V/g or counts/g"
+          - "calibration function force = A / N + B (linear in conductance) given with the fitted A and B"
+          - "all values with units"
+
+      - id: an_conditioning
+        label: "analysis - conditioning (2 pt)"
+        type: slider
+        min: 0
+        max: 2
+        step: 1
+        points: 2
+        description: "The circuits used for conditioning the sensor signals are described: voltage divider, instrumentation amplifier. The used components are shown in the schematic."
+
+      - id: an_conditioning_obs
+        label: "observations"
+        type: checklist
+        points_per_positive: 0
+        negative:
+          - "schematic missing, or template specimen (potentiometer, 100 nF) left in"
+          - "components not labelled or values missing"
+          - "only one of the two signal paths shown (divider or INA122)"
+          - "gain resistor not identified, or gain not computed"
+          - "figure not referenced in the text"
+        positive:
+          - "schematic shows 100 kOhm pull-up with foil sensor and INA122 with its gain resistor"
+          - "component values and designators match the formulas in the text"
+          - "tolerance of the gain resistor mentioned (effect on gain)"
+          - "figure referenced where discussed"
+
+  # ════════════════════════════════════════════════════════════════
+  # 3. METHOD & SETUP  ·  6 pt  (1+2+1+1+1)
+  # ════════════════════════════════════════════════════════════════
+  - id: method
+    title: "method & setup"
+    fields:
+
+      - id: me_setup
+        label: "method - setup (1 pt)"
+        type: slider
+        min: 0
+        max: 1
+        step: 1
+        points: 1
+        description: "The setup is described: physical aspects where relevant (where the sensor shield is placed, where the hand is, what is pushed), location of the used components on the shield, and the setting of the experiment (room, temperature, at a desk)."
+
+      - id: me_setup_obs
+        label: "observations"
+        type: checklist
+        points_per_positive: 0
+        negative:
+          - "no physical description (hand, finger, how the sensors are loaded)"
+          - "shield drawing missing, generic, or used parts not marked"
+          - "experiment conditions (room, temperature, desk) not mentioned"
+          - "no photo or sketch of the setup"
+        positive:
+          - "annotated shield drawing marking the used components"
+          - "photo or sketch of the setup showing sensors and finger / scale"
+          - "conditions stated (room, approximate temperature, table)"
+
+      - id: me_code
+        label: "method - code (2 pt)"
+        type: slider
+        min: 0
+        max: 2
+        step: 1
+        points: 2
+        description: "The code used for the experiment is described and given. Concise, cleaned-up and minimal; copy-pasting from the reader is not the way to go."
+
+      - id: me_code_obs
+        label: "observations"
+        type: checklist
+        points_per_positive: 0
+        negative:
+          - "code copied from wiki or reader without cleaning"
+          - "long listing with unused parts or no comments"
+          - "constants in the code do not match the values in the text"
+          - "code for one of the two conversions missing"
+          - "listing formatted poorly (large white space, unreadable)"
+        positive:
+          - "short listing covering both conversions (ADC to g)"
+          - "constants (offset, scale, A, B) traceable to the calibration data"
+          - "output suited for plotting (both calibrated values per line)"
+          - "code explained in the text (what it does, sample rate)"
+
+      - id: me_reference
+        label: "method - reference (1 pt)"
+        type: slider
+        min: 0
+        max: 1
+        step: 1
+        points: 1
+        description: "The reference signal, reference measurement or calibration source is described."
+
+      - id: me_reference_obs
+        label: "observations"
+        type: checklist
+        points_per_positive: 0
+        negative:
+          - "no description of how the load cell was calibrated"
+          - "reference weights or scale not specified"
+          - "'calibrated' claimed without any data"
+        positive:
+          - "calibration with known weights or kitchen scale described"
+          - "calibration table with raw ADC value versus reference value"
+          - "accuracy or resolution of the calibration source mentioned"
+
+      - id: me_samples
+        label: "method - samples (1 pt)"
+        type: slider
+        min: 0
+        max: 1
+        step: 1
+        points: 1
+        description: "The number of samples, measurements or series taken is stated."
+
+      - id: me_samples_obs
+        label: "observations"
+        type: checklist
+        points_per_positive: 0
+        negative:
+          - "number of samples or cycles not stated"
+          - "only a single push-release cycle"
+          - "sampling interval / rate not mentioned"
+        positive:
+          - "number of calibration points and number of push-release cycles stated"
+          - "sample rate stated"
+          - "enough cycles to see repeatability (3 or more)"
+
+      - id: me_procedure
+        label: "method - procedure (1 pt)"
+        type: slider
+        min: 0
+        max: 1
+        step: 1
+        points: 1
+        description: "The steps taken, and in which order, are described."
+
+      - id: me_procedure_obs
+        label: "observations"
+        type: checklist
+        points_per_positive: 0
+        negative:
+          - "steps not in order or not reproducible"
+          - "load limit (5 N / 500 g) not mentioned"
+          - "unclear how both sensors were loaded at the same time"
+        positive:
+          - "ordered steps from load cell calibration to foil sensor calibration"
+          - "load limit mentioned and respected"
+          - "push and release speed described"
+
+  # ════════════════════════════════════════════════════════════════
+  # 4. RESULTS  ·  5 pt  (1+1+1+1+1)
+  # ════════════════════════════════════════════════════════════════
+  - id: results
+    title: "results"
+    fields:
+
+      - id: re_time
+        label: "results - time series (1 pt)"
+        type: slider
+        min: 0
+        max: 1
+        step: 1
+        points: 1
+        description: "A clear graph showing the experimental procedure: a number of user interactions (pushes) in time, corresponding to the outlined procedure."
+
+      - id: re_time_obs
+        label: "observations"
+        type: checklist
+        points_per_positive: 0
+        negative:
+          - "no time series shown"
+          - "push-release cycles not recognisable"
+          - "time axis in sample number only, or not in seconds"
+          - "raw counts and grams on one unlabelled axis"
+        positive:
+          - "clear push-release cycles with reference and sensor signals"
+          - "time axis in seconds"
+          - "corresponds to the described procedure"
+
+      - id: re_calibration
+        label: "results - calibration graph (1 pt)"
+        type: slider
+        min: 0
+        max: 1
+        step: 1
+        points: 1
+        description: "A clear graph showing sensor data and reference data. A time series can be added, but the important one is the x-y graph of sensor versus reference."
+
+      - id: re_calibration_obs
+        label: "observations"
+        type: checklist
+        points_per_positive: 0
+        negative:
+          - "no x-y plot, only time series"
+          - "axes swapped (reference belongs on x)"
+          - "no ideal line or fit to judge the deviation"
+          - "unlabelled axes or units"
+        positive:
+          - "x-y plot: calibrated foil sensor versus reference, with units"
+          - "ideal line or fit drawn"
+          - "several cycles visible"
+
+      - id: re_error
+        label: "results - error plot (1 pt)"
+        type: slider
+        min: 0
+        max: 1
+        step: 1
+        points: 1
+        description: "A clear graph showing the error (difference between reference and measured value). The reference value range on the x-axis is better than the time series."
+
+      - id: re_error_obs
+        label: "observations"
+        type: checklist
+        points_per_positive: 0
+        negative:
+          - "no error plot"
+          - "error plotted against time instead of against the reference"
+          - "error definition or sign not stated"
+          - "clipped, out-of-range samples left in without comment"
+        positive:
+          - "error versus reference value, in g"
+          - "valid range indicated or clipped part removed"
+          - "sign convention stated"
+
+      - id: re_nonlinear
+        label: "results - non-linear details (1 pt)"
+        type: slider
+        min: 0
+        max: 1
+        step: 1
+        points: 1
+        description: "Graphs showing relevant details of non-linear behaviour such as hysteresis, or a close-up showing non-uniform resolution."
+
+      - id: re_nonlinear_obs
+        label: "observations"
+        type: checklist
+        points_per_positive: 0
+        negative:
+          - "hysteresis claimed but not shown"
+          - "up and down branches not distinguishable"
+          - "no close-up of non-uniform resolution"
+          - "loop includes the clipped part"
+        positive:
+          - "one clear cycle showing the hysteresis loop"
+          - "up and down branches marked"
+          - "close-up of resolution steps at the high-resistance (low-force) end"
+
+      - id: re_graphing
+        label: "results - graphing quality (1 pt)"
+        type: slider
+        min: 0
+        max: 1
+        step: 1
+        points: 1
+        description: "The graphs show a relevant number of samples, have good scaling, and relevant (SI) units on the axes."
+
+      - id: re_graphing_obs
+        label: "observations"
+        type: checklist
+        points_per_positive: 0
+        negative:
+          - "axis titles or units missing (default chart titles)"
+          - "raw counts and calibrated values mixed on one axis"
+          - "poor scaling, or too few samples"
+          - "units not SI or inconsistent (g versus N)"
+        positive:
+          - "all axes labelled with units"
+          - "sensible scaling and enough samples"
+          - "units consistent with the text"
+
+  # ════════════════════════════════════════════════════════════════
+  # 5. CONCLUSION  ·  6 pt  (1+1+1+1+1+1)
+  # ════════════════════════════════════════════════════════════════
+  - id: conclusion
+    title: "conclusion"
+    fields:
+
+      - id: co_accuracy
+        label: "conclusion - accuracy (1 pt)"
+        type: slider
+        min: 0
+        max: 1
+        step: 1
+        points: 1
+        description: "A meaningful and quantified notion of accuracy, linked to the input/output range of the sensor. The accuracy of the reference is discussed too. The mean and standard deviation of the error tell only part of the story."
+
+      - id: co_accuracy_obs
+        label: "observations"
+        type: checklist
+        points_per_positive: 0
+        negative:
+          - "accuracy given only as the mean error (about zero by construction of the fit)"
+          - "no link to the range (no percentage of full scale)"
+          - "accuracy of the reference not discussed"
+          - "out-of-range samples included without comment"
+        positive:
+          - "worst-case or RMS error given in g and as percentage of full scale"
+          - "accuracy of the reference discussed (load cell specification, kitchen scale)"
+          - "range over which the number holds is stated"
+
+      - id: co_resolution
+        label: "conclusion - resolution (1 pt)"
+        type: slider
+        min: 0
+        max: 1
+        step: 1
+        points: 1
+        description: "A meaningful, quantified notion of resolution, for both the reference and the sensor signal. Non-linearities in resolution are especially important to mention (and calculate). Reference: ADC about 0.49 g/count for the reference; for F = A/N + B the foil resolution is A/N^2 per count, which varies strongly over the range."
+
+      - id: co_resolution_obs
+        label: "observations"
+        type: checklist
+        points_per_positive: 0
+        negative:
+          - "resolution only as ADC bits, not translated to g"
+          - "no value for the foil sensor, or none for the reference"
+          - "single value although the resolution is clearly non-uniform"
+        positive:
+          - "reference resolution in g per count (about 0.49 g)"
+          - "foil resolution calculated at both ends of the range"
+          - "non-uniformity quantified"
+
+      - id: co_precision
+        label: "conclusion - precision (1 pt)"
+        type: slider
+        min: 0
+        max: 1
+        step: 1
+        points: 1
+        description: "Precision can be calculated from multiple measurements of the same thing, giving a (standard) deviation. The standard deviation of the error is related, but a set of samples per measurement is better."
+
+      - id: co_precision_obs
+        label: "observations"
+        type: checklist
+        points_per_positive: 0
+        negative:
+          - "precision confused with accuracy"
+          - "no repeated measurement of the same quantity"
+          - "standard deviation of the error given without noting its limitation"
+        positive:
+          - "standard deviation from repeated samples at the same force"
+          - "standard deviation of the error given, limitation noted"
+          - "number of samples behind the value stated"
+
+      - id: co_range
+        label: "conclusion - range (1 pt)"
+        type: slider
+        min: 0
+        max: 1
+        step: 1
+        points: 1
+        description: "The relevant input and output ranges are stated in meaningful units. If behaviour is linearised or considered linear in a certain range, this is mentioned."
+
+      - id: co_range_obs
+        label: "observations"
+        type: checklist
+        points_per_positive: 0
+        negative:
+          - "range missing or only in raw counts"
+          - "input and output range mixed up"
+          - "usable (linear) range not stated"
+          - "clipping of the reference not mentioned"
+        positive:
+          - "input range in g (or N) and output range in V or counts"
+          - "linear / usable range of the foil sensor stated"
+          - "limit of the reference (saturation near 500 g) mentioned"
+
+      - id: co_nonlin
+        label: "conclusion - non-linearities (1 pt)"
+        type: slider
+        min: 0
+        max: 1
+        step: 1
+        points: 1
+        description: "Non-linearities in the behaviour of the sensor are clearly addressed, preferably with some quantification."
+
+      - id: co_nonlin_obs
+        label: "observations"
+        type: checklist
+        points_per_positive: 0
+        negative:
+          - "only 'it is non-linear', no numbers"
+          - "hysteresis only; other non-linearities (1/x, saturation) ignored"
+          - "no comparison with the datasheet"
+        positive:
+          - "hysteresis quantified in g and as percentage of full scale"
+          - "deviation from a straight line quantified"
+          - "compared with the A101 datasheet (linearity, hysteresis)"
+
+      - id: co_improve
+        label: "conclusion - improvements (1 pt)"
+        type: slider
+        min: 0
+        max: 1
+        step: 1
+        points: 1
+        description: "The bottleneck(s) in the setup are mentioned and, where asked, options for improvement are given. The assignment asks for critical feedback on the process (systematic errors)."
+
+      - id: co_improve_obs
+        label: "observations"
+        type: checklist
+        points_per_positive: 0
+        negative:
+          - "no bottleneck named"
+          - "generic suggestions not linked to the results ('use a better sensor')"
+          - "systematic errors not discussed"
+        positive:
+          - "bottleneck identified from the data (reference clipping, 10-bit ADC at the low-force end, finger versus sensing area)"
+          - "concrete improvement (gain resistor, load concentrator, static calibration points, conditioning cycles)"
+          - "systematic errors named (offset, scale accuracy, temperature, creep)"
+
+  # ════════════════════════════════════════════════════════════════
+  # 6. FORMAT & STRUCTURE  ·  3 pt  (2+1)
+  # ════════════════════════════════════════════════════════════════
+  - id: format
+    title: "format & structure"
+    fields:
+
+      - id: fo_template
+        label: "format - template (2 pt)"
+        type: slider
+        min: 0
+        max: 2
+        step: 1
+        points: 2
+        description: "The template has been followed and used correctly: font, layout, figure numbering, references. No major blank sections or badly copy-pasted resources. No huge white spaces in blocks of code."
+
+      - id: fo_template_obs
+        label: "observations"
+        type: checklist
+        points_per_positive: 0
+        negative:
+          - "template sections missing or restructured"
+          - "template instruction text or specimen figures left in"
+          - "figure numbers inconsistent or duplicated"
+          - "figures without captions or not referenced in the text"
+          - "blank sections"
+          - "large white space in code blocks"
+        positive:
+          - "all template sections completed"
+          - "figures numbered consistently and referenced in the text"
+          - "compact, readable code blocks"
+          - "consistent fonts and layout"
+
+      - id: fo_references
+        label: "format - references (1 pt)"
+        type: slider
+        min: 0
+        max: 1
+        step: 1
+        points: 1
+        description: "Where images, blocks of code or other resources were obtained elsewhere, they are clearly referenced."
+
+      - id: fo_references_obs
+        label: "observations"
+        type: checklist
+        points_per_positive: 0
+        negative:
+          - "datasheets not referenced"
+          - "wiki figures (schematic, shield drawing) used without source"
+          - "code adapted from wiki or reader without attribution"
+        positive:
+          - "datasheets referenced (A101, INA122, load cell)"
+          - "figures from the wiki credited"
+          - "origin of adapted code stated"
+
+  # ════════════════════════════════════════════════════════════════
+  # 7. OVERALL FEEDBACK  ·  no points
+  # ════════════════════════════════════════════════════════════════
+  - id: overall
+    title: "overall feedback"
+    fields:
+
+      - id: overall_note
+        label: "overall feedback for the student"
+        type: textarea
+        placeholder: "Summary: strongest part, most important thing to improve..."
+`;
+
+// ═══════════════════════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════════════════════
+let rubric = null;
+let currentYaml = DEFAULT_YAML;
+let assessments = [];   // { id, name, meta:{student,project,assessor}, values:{} }
+let currentId = null;
+let _aid = 0;
+function mkId(){ return 'a'+(++_aid) }
+
+function cur(){ return assessments.find(a=>a.id===currentId) }
+
+// ═══════════════════════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════════════════════
+function init(){
+  // try to load from localStorage
+  try {
+    const saved = localStorage.getItem('rubric_session_sensors_a3');
+    if(saved){
+      const data = JSON.parse(saved);
+      currentYaml = data.yaml || DEFAULT_YAML;
+      rubric = jsyaml.load(currentYaml);
+      assessments = data.assessments || [];
+      _aid = data.aid || 0;
+      currentId = data.currentId || assessments[0]?.id;
+    }
+  } catch(e){}
+  if(!rubric){ rubric = jsyaml.load(DEFAULT_YAML) }
+  if(assessments.length===0){ _newAssessment('Assessment 1') }
+  renderAll();
+}
+
+function _newAssessment(name){
+  const id = mkId();
+  assessments.push({id, name:name||'Assessment '+(assessments.length+1), meta:{student:'',project:'',assessor:''}, values:{}});
+  currentId = id;
+}
+
+function autosave(){
+  try {
+    localStorage.setItem('rubric_session_sensors_a3', JSON.stringify({
+      yaml: currentYaml, assessments, aid:_aid, currentId
+    }));
+  } catch(e){}
+}
+
+// ═══════════════════════════════════════════════════════════
+//  SIDEBAR
+// ═══════════════════════════════════════════════════════════
+function renderSidebar(){
+  const list = document.getElementById('sb-list');
+  list.innerHTML = '';
+  assessments.forEach(a=>{
+    const d = document.createElement('div');
+    d.className = 'sb-item'+(a.id===currentId?' active':'');
+    d.innerHTML = `<span class="sb-name" title="${esc(a.name)}">${esc(a.name)}</span>
+      <input class="rename-inp" value="${esc(a.name)}"/>
+      <button class="icon-btn" title="Rename" onclick="event.stopPropagation();startRename('${a.id}',this)">✎</button>
+      <button class="icon-btn" title="Delete" onclick="event.stopPropagation();deleteAssessment('${a.id}')">✕</button>`;
+    d.querySelector('.sb-name').onclick = ()=>switchTo(a.id);
+    list.appendChild(d);
+  });
+}
+
+function startRename(id, btn){
+  const item = btn.closest('.sb-item');
+  const span = item.querySelector('.sb-name');
+  const inp  = item.querySelector('.rename-inp');
+  span.style.display='none'; inp.style.display='block'; inp.focus(); inp.select();
+  const done = ()=>{
+    const v = inp.value.trim()||span.textContent;
+    const a = assessments.find(x=>x.id===id);
+    if(a) a.name=v;
+    span.textContent=v; span.style.display=''; inp.style.display='none';
+    if(id===currentId) document.getElementById('tb-sub').textContent=v;
+    autosave(); renderSidebar();
+  };
+  inp.onblur=done; inp.onkeydown=e=>{ if(e.key==='Enter') inp.blur() };
+}
+
+function switchTo(id){
+  if(id===currentId) return;
+  currentId=id; renderAll(); autosave();
+}
+
+function newAssessment(){
+  _newAssessment(); renderAll(); autosave();
+}
+
+function duplicateCurrent(){
+  const src=cur(); if(!src) return;
+  const id=mkId();
+  assessments.push({id, name:src.name+' (copy)', meta:{...src.meta}, values:JSON.parse(JSON.stringify(src.values))});
+  currentId=id; renderAll(); autosave();
+}
+
+function deleteAssessment(id){
+  if(assessments.length===1&&!confirm('Delete the only assessment?')) return;
+  if(assessments.length>1&&!confirm('Delete this assessment?')) return;
+  assessments=assessments.filter(a=>a.id!==id);
+  if(currentId===id) currentId=assessments[0]?.id;
+  if(assessments.length===0) _newAssessment();
+  renderAll(); autosave();
+}
+
+// ═══════════════════════════════════════════════════════════
+//  TOPBAR + META
+// ═══════════════════════════════════════════════════════════
+function renderTopbar(){
+  const a=cur();
+  document.getElementById('tb-title').textContent = rubric?.title||'Rubric Tool';
+  document.getElementById('tb-sub').textContent   = a?.name||'';
+}
+
+function saveMeta(){
+  const a=cur(); if(!a) return;
+  a.meta.student  = document.getElementById('m-student').value;
+  a.meta.project  = document.getElementById('m-project').value;
+  a.meta.assessor = document.getElementById('m-assessor').value;
+  autosave();
+}
+
+function loadMeta(){
+  const a=cur();
+  document.getElementById('m-student').value  = a?.meta?.student||'';
+  document.getElementById('m-project').value  = a?.meta?.project||'';
+  document.getElementById('m-assessor').value = a?.meta?.assessor||'';
+}
+
+// ═══════════════════════════════════════════════════════════
+//  VALUE HELPERS
+// ═══════════════════════════════════════════════════════════
+function get(key, def){ return cur()?.values?.[key]??def }
+function set(key,val){ const a=cur(); if(a){ a.values[key]=val; } refreshOutput(); autosave(); }
+
+// ═══════════════════════════════════════════════════════════
+//  FORM RENDER
+// ═══════════════════════════════════════════════════════════
+function renderForm(){
+  const form = document.getElementById('sections-form');
+  const nav  = document.getElementById('nav-links');
+  form.innerHTML=''; nav.innerHTML='';
+  if(!rubric) return;
+
+  rubric.sections.forEach((sec,si)=>{
+    // section element
+    const secEl = document.createElement('div');
+    secEl.className='form-section'; secEl.id='sec-'+sec.id;
+    secEl.innerHTML='<h2>'+esc(sec.title)+'</h2>';
+    sec.fields.forEach(f=>{ secEl.appendChild(buildField(f)) });
+    form.appendChild(secEl);
+
+    // nav link
+    const lnk = document.createElement('div');
+    lnk.className='nav-link'+(si===0?' active':'');
+    lnk.textContent=sec.title;
+    lnk.onclick=()=>{
+      document.getElementById('sec-'+sec.id)?.scrollIntoView({behavior:'smooth',block:'start'});
+    };
+    nav.appendChild(lnk);
+  });
+
+  // scroll spy
+  const fa=document.getElementById('form-area');
+  fa.onscroll=()=>{
+    const links=nav.querySelectorAll('.nav-link');
+    rubric.sections.forEach((sec,i)=>{
+      const el=document.getElementById('sec-'+sec.id);
+      if(!el) return;
+      const rect=el.getBoundingClientRect();
+      if(rect.top<160&&rect.bottom>0){
+        links.forEach(l=>l.classList.remove('active'));
+        links[i]?.classList.add('active');
+      }
+    });
+  };
+}
+
+function buildField(f){
+  const wrap=document.createElement('div');
+  wrap.className='field-block';
+  let html=`<div class="field-label">${esc(f.label)}</div>`;
+  if(f.description) html+=`<div class="field-desc">${esc(f.description)}</div>`;
+
+  if(f.type==='slider'){
+    const v=get(f.id,f.min??0);
+    const max=f.points??f.max??0;
+    html+=`<div class="slider-wrap">
+      <input type="range" id="sl-${f.id}" min="${f.min??0}" max="${f.max??10}" step="${f.step??1}" value="${v}"/>
+      <span class="slider-readout" id="sr-${f.id}">${v} / ${max}</span>
+    </div><div class="slider-bounds"><span>${f.min??0}</span><span>${f.max??10}</span></div>`;
+  }
+  else if(f.type==='checkbox'){
+    const items=(f.items||[]);
+    html+='<div class="checkbox-grid">';
+    items.forEach((lbl,i)=>{
+      const key=f.id+'_'+i; const chk=get(key,false);
+      html+=`<div class="cb-item${chk?' checked':''}" id="cbi-${key}" onclick="toggleCb('${f.id}',${i},this)">
+        <input type="checkbox" id="cb-${key}" ${chk?'checked':''}/>
+        <label for="cb-${key}">${esc(lbl)}</label></div>`;
+    });
+    html+='</div>';
+  }
+  else if(f.type==='radio'){
+    const cur_v=get(f.id,null);
+    html+='<div class="radio-list" id="rl-'+f.id+'">';
+    (f.points||[]).forEach((opt,i)=>{
+      const sel=cur_v===opt.value;
+      html+=`<div class="radio-opt${sel?' selected':''}" onclick="pickRadio('${f.id}',${opt.value},this.closest('.radio-list'))">
+        <input type="radio" name="r-${f.id}" value="${opt.value}" ${sel?'checked':''}/>
+        <label>${esc(opt.label)}</label>
+        <span class="radio-pts">${opt.value} pt${opt.value!==1?'s':''}</span></div>`;
+    });
+    html+='</div>';
+  }
+  else if(f.type==='checklist'){
+    const neg=f.negative||[]; const pos=f.positive||[];
+    const negNote=get(f.id+'__neg_note','');
+    const posNote=get(f.id+'__pos_note','');
+    html+='<div class="checklist-cols"><div class="cl-col">';
+    html+='<div class="cl-head neg">To improve</div>';
+    neg.forEach((t,i)=>{
+      const k=f.id+'__neg__'+i; const chk=get(k,false);
+      html+=`<div class="cl-check neg${chk?' checked':''}" id="clc-${k}" onclick="toggleCl('${f.id}','neg',${i},this)">
+        <input type="checkbox" ${chk?'checked':''}/><label>– ${esc(t)}</label></div>`;
+    });
+    html+=`<div class="cl-note"><input class="text-inp" id="cln-neg-${f.id}" placeholder="Add note…" value="${esc(negNote)}"
+      oninput="set('${f.id}__neg_note',this.value)"/></div>`;
+    html+=`<div class="cl-add"><input id="cla-neg-${f.id}" placeholder="Add negative point…"/>
+      <button onclick="addClItem('${f.id}','neg')">Add</button></div>`;
+    html+='</div><div class="cl-col">';
+    html+='<div class="cl-head pos">Well done</div>';
+    pos.forEach((t,i)=>{
+      const k=f.id+'__pos__'+i; const chk=get(k,false);
+      html+=`<div class="cl-check pos${chk?' checked':''}" id="clc-${k}" onclick="toggleCl('${f.id}','pos',${i},this)">
+        <input type="checkbox" ${chk?'checked':''}/><label>+ ${esc(t)}</label></div>`;
+    });
+    html+=`<div class="cl-note"><input class="text-inp" id="cln-pos-${f.id}" placeholder="Add note…" value="${esc(posNote)}"
+      oninput="set('${f.id}__pos_note',this.value)"/></div>`;
+    html+=`<div class="cl-add"><input id="cla-pos-${f.id}" placeholder="Add positive point…"/>
+      <button onclick="addClItem('${f.id}','pos')">Add</button></div>`;
+    html+='</div></div>';
+  }
+  else if(f.type==='textarea'){
+    const v=get(f.id,'');
+    html+=`<textarea class="text-inp" id="ti-${f.id}" placeholder="${esc(f.placeholder||'')}"
+      oninput="set('${f.id}',this.value)">${esc(v)}</textarea>`;
+  }
+  else { // text
+    const v=get(f.id,'');
+    html+=`<input class="text-inp" id="ti-${f.id}" placeholder="${esc(f.placeholder||'')}"
+      value="${esc(v)}" oninput="set('${f.id}',this.value)"/>`;
+  }
+
+  wrap.innerHTML=html;
+  // attach slider event (needs DOM node)
+  if(f.type==='slider'){
+    const sl=wrap.querySelector('input[type=range]');
+    const sr=wrap.querySelector('.slider-readout');
+    const max=f.points??f.max??0;
+    sl.addEventListener('input',()=>{
+      const v=parseInt(sl.value);
+      sr.textContent=v+' / '+max;
+      set(f.id,v);
+    });
+  }
+  return wrap;
+}
+
+// ═══════════════════════════════════════════════════════════
+//  FIELD INTERACTION
+// ═══════════════════════════════════════════════════════════
+function toggleCb(fid,idx,el){
+  const k=fid+'_'+idx; const now=!get(k,false);
+  set(k,now);
+  el.classList.toggle('checked',now);
+  el.querySelector('input').checked=now;
+}
+
+function pickRadio(fid,val,list){
+  set(fid,val);
+  list.querySelectorAll('.radio-opt').forEach(o=>{
+    const isMe=parseFloat(o.querySelector('input').value)===val;
+    o.classList.toggle('selected',isMe);
+    o.querySelector('input').checked=isMe;
+  });
+}
+
+function toggleCl(fid,side,idx,el){
+  const k=fid+'__'+side+'__'+idx; const now=!get(k,false);
+  set(k,now);
+  el.classList.toggle('checked',now);
+  el.querySelector('input').checked=now;
+}
+
+function addClItem(fid,side){
+  const inp=document.getElementById('cla-'+side+'-'+fid);
+  const txt=inp.value.trim(); if(!txt) return; inp.value='';
+  // add to rubric definition
+  for(const sec of rubric.sections){
+    const f=sec.fields.find(x=>x.id===fid); if(!f) continue;
+    const arr=side==='neg'?(f.negative||(f.negative=[])):(f.positive||(f.positive=[]));
+    const idx=arr.length; arr.push(txt);
+    // insert DOM node before add-row
+    const col=inp.closest('.cl-col');
+    const addRow=inp.closest('.cl-add');
+    const div=document.createElement('div');
+    const k=fid+'__'+side+'__'+idx;
+    div.className='cl-check '+side;
+    div.id='clc-'+k;
+    div.onclick=function(){ toggleCl(fid,side,idx,this) };
+    div.innerHTML=`<input type="checkbox"/><label>${side==='neg'?'– ':'+ '}${esc(txt)}</label>`;
+    col.insertBefore(div,addRow);
+    break;
+  }
+  refreshOutput(); autosave();
+}
+
+// ═══════════════════════════════════════════════════════════
+//  OUTPUT
+// ═══════════════════════════════════════════════════════════
+function computePoints(){
+  let earned=0,max=0;
+  if(!rubric) return {earned,max};
+  for(const sec of rubric.sections){
+    for(const f of sec.fields){
+      if(f.type==='slider'){
+        const v=get(f.id,f.min??0);
+        const pts=f.points??f.max??0;
+        earned+=Number(v); max+=pts;
+      }else if(f.type==='checkbox'){
+        const ppi=f.points_per_item??1;
+        (f.items||[]).forEach((_,i)=>{ if(get(f.id+'_'+i,false)){ earned+=ppi } });
+        max+=(f.items||[]).length*ppi;
+      }else if(f.type==='radio'){
+        const v=get(f.id,null);
+        const maxV=Math.max(...(f.points||[]).map(p=>p.value),0);
+        if(v!==null) earned+=Number(v);
+        max+=maxV;
+      }else if(f.type==='checklist'){
+        const ppp=f.points_per_positive??1;
+        (f.positive||[]).forEach((_,i)=>{ if(get(f.id+'__pos__'+i,false)) earned+=ppp });
+        max+=(f.positive||[]).length*ppp;
+      }
+    }
+  }
+  return {earned,max};
+}
+
+function refreshOutput(){
+  const a=cur(); if(!a||!rubric) return;
+  const lines=[];
+  const date=new Date().toLocaleDateString('nl-NL');
+
+  lines.push('# '+rubric.title+(rubric.course?' ('+rubric.course+')':''));
+  if(a.meta.student) lines.push('Student: '+a.meta.student);
+  if(a.meta.project) lines.push('Project: '+a.meta.project);
+  if(a.meta.assessor) lines.push('Assessor: '+a.meta.assessor);
+  lines.push('Date: '+date);
+
+  for(const sec of rubric.sections){
+    lines.push(''); lines.push('# '+sec.title);
+    for(const f of sec.fields){
+      if(f.type==='slider'){
+        const v=get(f.id,f.min??0);
+        const max=f.points??f.max??0;
+        lines.push(f.label+': '+v+' / '+max);
+      }else if(f.type==='checkbox'){
+        const checked=(f.items||[]).filter((_,i)=>get(f.id+'_'+i,false));
+        if(checked.length) lines.push(f.label+': '+checked.join(', '));
+      }else if(f.type==='radio'){
+        const v=get(f.id,null);
+        if(v!==null){
+          const opt=(f.points||[]).find(p=>p.value===v);
+          lines.push(f.label+': '+( opt?.label||v ));
+        }
+      }else if(f.type==='checklist'){
+        const posChecked=(f.positive||[]).filter((_,i)=>get(f.id+'__pos__'+i,false));
+        const negChecked=(f.negative||[]).filter((_,i)=>get(f.id+'__neg__'+i,false));
+        if(posChecked.length||negChecked.length){
+          lines.push(f.label+':');
+          posChecked.forEach(t=>lines.push('  + '+t));
+          negChecked.forEach(t=>lines.push('  – '+t));
+        }
+        const negNote=get(f.id+'__neg_note',''); const posNote=get(f.id+'__pos_note','');
+        if(negNote) lines.push('  Note: '+negNote);
+        if(posNote) lines.push('  Note: '+posNote);
+      }else if(f.type==='text'||f.type==='textarea'){
+        const v=get(f.id,''); if(v) lines.push(f.label+': '+v);
+      }
+    }
+  }
+
+  const {earned,max}=computePoints();
+  if(rubric.grading&&max>0){
+    const dec=rubric.grade_decimals??1;
+    const grade=(1+9*(earned/max)).toFixed(dec);
+    lines.push(''); lines.push('---');
+    lines.push('Points: '+earned+' / '+max);
+    lines.push('Grade (EU 1–10): '+grade);
+    const pill=document.getElementById('grade-pill');
+    pill.textContent='Grade: '+grade; pill.style.display='';
+  }
+
+  document.getElementById('output-pre').textContent=lines.join('\n');
+}
+
+function copyOutput(){
+  const text=document.getElementById('output-pre').textContent;
+  navigator.clipboard.writeText(text).then(()=>toast('Copied!'));
+}
+
+function downloadMd(){
+  const text=document.getElementById('output-pre').textContent;
+  const name=(cur()?.meta?.student||'assessment').replace(/\s+/g,'-').toLowerCase();
+  const blob=new Blob([text],{type:'text/markdown'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a'); a.href=url; a.download=name+'.md'; a.click();
+  URL.revokeObjectURL(url);
+}
+
+// ═══════════════════════════════════════════════════════════
+//  EDITOR MODAL
+// ═══════════════════════════════════════════════════════════
+function openEditor(){
+  document.getElementById('editor-ta').value=currentYaml;
+  document.getElementById('editor-err').className='';
+  document.getElementById('editor-err').textContent='';
+  document.getElementById('editor-overlay').classList.add('open');
+}
+function closeEditor(){ document.getElementById('editor-overlay').classList.remove('open') }
+function applyRubric(){
+  const yaml=document.getElementById('editor-ta').value;
+  try{
+    const parsed=jsyaml.load(yaml);
+    if(!parsed?.sections) throw new Error('No "sections" key found');
+    rubric=parsed; currentYaml=yaml;
+    renderAll(); closeEditor();
+    toast('Rubric applied');
+  }catch(e){
+    const err=document.getElementById('editor-err');
+    err.textContent='⚠ '+e.message; err.className='show';
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+//  SAVE / LOAD SESSION FILE
+// ═══════════════════════════════════════════════════════════
+function saveSession(){
+  const payload=JSON.stringify({yaml:currentYaml,assessments,aid:_aid,currentId},null,2);
+  const blob=new Blob([payload],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a'); a.href=url; a.download='rubric-session.json'; a.click();
+  URL.revokeObjectURL(url); toast('Session saved');
+}
+
+function loadSession(){
+  const inp=document.createElement('input'); inp.type='file'; inp.accept='.json,.yaml,.yml';
+  inp.onchange=async e=>{
+    const file=e.target.files[0]; if(!file) return;
+    const text=await file.text();
+    try{
+      if(file.name.endsWith('.json')){
+        const data=JSON.parse(text);
+        if(data.yaml){ currentYaml=data.yaml; rubric=jsyaml.load(currentYaml) }
+        if(data.assessments){ assessments=data.assessments; _aid=data.aid||0 }
+        currentId=data.currentId||assessments[0]?.id;
+        if(assessments.length===0) _newAssessment();
+      }else{
+        // load as rubric YAML
+        rubric=jsyaml.load(text); currentYaml=text;
+      }
+      renderAll(); autosave(); toast('Loaded');
+    }catch(e){ alert('Load error: '+e.message) }
+  };
+  inp.click();
+}
+
+// ═══════════════════════════════════════════════════════════
+//  LOAD RUBRIC FROM SERVER (same origin, relative path)
+// ═══════════════════════════════════════════════════════════
+// Change SERVER_RUBRIC_URL to match your hosted YAML filename.
+// A relative path works on any host (GitHub Pages, Netlify, etc.)
+const SERVER_RUBRIC_URL = 'rubric-sensors-resistive.yaml';
+
+async function loadServerRubric(){
+  const btn = document.getElementById('btn-server');
+  const status = document.getElementById('server-status');
+  btn.classList.add('loading');
+  btn.textContent = '⇩ Fetching…';
+  status.className = '';
+  status.textContent = '';
+  try {
+    const res = await fetch(SERVER_RUBRIC_URL, {cache:'no-cache'});
+    if(!res.ok) throw new Error(`HTTP ${res.status} — ${res.statusText}`);
+    const text = await res.text();
+    const parsed = jsyaml.load(text);
+    if(!parsed?.sections) throw new Error('No "sections" key found in YAML');
+    rubric = parsed;
+    currentYaml = text;
+    renderAll();
+    autosave();
+    const ts = new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+    status.textContent = `✓ Loaded from server ${ts}`;
+    status.className = 'ok';
+    toast('Server rubric loaded & saved locally');
+  } catch(e) {
+    status.textContent = '✗ ' + e.message;
+    status.className = 'err';
+    toast('Failed to load server rubric');
+  } finally {
+    btn.classList.remove('loading');
+    btn.textContent = '⇩ Load server rubric';
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+//  UTILS
+// ═══════════════════════════════════════════════════════════
+function esc(s){ return s==null?'':String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;') }
+
+function toast(msg){
+  const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),1800);
+}
+
+// ═══════════════════════════════════════════════════════════
+//  RENDER ALL
+// ═══════════════════════════════════════════════════════════
+function renderAll(){
+  renderSidebar(); renderTopbar(); loadMeta(); renderForm(); refreshOutput();
+}
+
+// close modal on backdrop click
+document.getElementById('editor-overlay').addEventListener('click',e=>{ if(e.target===e.currentTarget) closeEditor() });
+
+init();
+</script>
+</body>
+</html>

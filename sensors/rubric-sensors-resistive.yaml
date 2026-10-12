@@ -1,0 +1,676 @@
+# ══════════════════════════════════════════════════════════════════
+#  RUBRIC DEFINITION - Sensors for Creative Technology
+#  Assignment 3: Resistive Sensing (A101 foil sensor vs. load cell)
+#  ──────────────────────────────────────────────────────────────────
+#  Total points: 30
+#  EU grade: 1 + 9 x (earned / 30)
+#
+#  1. Introduction         3 pt  (1+1+1)
+#  2. Analysis             7 pt  (1+1+1+2+2)
+#  3. Method & setup       6 pt  (1+2+1+1+1)
+#  4. Results              5 pt  (1+1+1+1+1)
+#  5. Conclusion           6 pt  (1+1+1+1+1+1)
+#  6. Format & structure   3 pt  (2+1)
+#
+#  Every criterion = one slider (the points) + one observation
+#  checklist (points_per_positive: 0, so it only generates feedback
+#  text and never changes the score).
+#  Use the notes under the checklist for the Canvas 'Comment' field.
+# ══════════════════════════════════════════════════════════════════
+
+title: "Sensors - Resistive Sensing (Assignment 3)"
+course: "SCT-A3"
+grading: true
+grade_decimals: 1
+
+sections:
+
+  # ════════════════════════════════════════════════════════════════
+  # 1. INTRODUCTION  ·  3 pt  (1+1+1)
+  # ════════════════════════════════════════════════════════════════
+  - id: intro
+    title: "introduction"
+    fields:
+
+      - id: intro_type
+        label: "introduction - sensor type (1 pt)"
+        type: slider
+        min: 0
+        max: 1
+        step: 1
+        points: 1
+        description: "Is the correct sensor type mentioned? (A101 piezoresistive foil force sensor, calibrated against a strain-gauge load cell.)"
+
+      - id: intro_type_obs
+        label: "observations"
+        type: checklist
+        points_per_positive: 0
+        negative:
+          - "sensor type missing or vague (only 'a pressure sensor')"
+          - "only one of the two sensors named"
+          - "wrong sensor type (e.g. capacitive, or load cell called a foil sensor)"
+        positive:
+          - "foil sensor named as piezoresistive force sensor (A101 / FlexiForce)"
+          - "load cell named as strain-gauge based reference"
+
+      - id: intro_principle
+        label: "introduction - physical principle (1 pt)"
+        type: slider
+        min: 0
+        max: 1
+        step: 1
+        points: 1
+        description: "Is the physical measurement principle mentioned?"
+
+      - id: intro_principle_obs
+        label: "observations"
+        type: checklist
+        points_per_positive: 0
+        negative:
+          - "no physical principle mentioned"
+          - "principle given for only one of the two sensors"
+          - "describes the electronics or the process instead of the physics"
+        positive:
+          - "piezoresistive effect: applied force changes the resistance of the foil"
+          - "strain-gauge / bridge principle mentioned for the reference"
+
+      - id: intro_goal
+        label: "introduction - measurement goal (1 pt)"
+        type: slider
+        min: 0
+        max: 1
+        step: 1
+        points: 1
+        description: "Is the goal clearly stated, without irrelevant (process-related) information?"
+
+      - id: intro_goal_obs
+        label: "observations"
+        type: checklist
+        points_per_positive: 0
+        negative:
+          - "goal missing or unclear"
+          - "goal buried in a description of what was done or which hardware was handed out"
+          - "goal is only 'to do the assignment'"
+        positive:
+          - "goal stated in one or two sentences (calibrate and characterise the A101 against the load cell)"
+          - "properties to be determined are named (range, resolution, precision, accuracy, hysteresis)"
+
+  # ════════════════════════════════════════════════════════════════
+  # 2. ANALYSIS  ·  7 pt  (1+1+1+2+2)
+  # ════════════════════════════════════════════════════════════════
+  - id: analysis
+    title: "analysis"
+    fields:
+
+      - id: an_measurand
+        label: "analysis - measurand (1 pt)"
+        type: slider
+        min: 0
+        max: 1
+        step: 1
+        points: 1
+        description: "It is clearly described what is measured: which physical quantity and in which units. Reference: force on the sensing area, read out as equivalent mass in g (500 g is about 4.9 N)."
+
+      - id: an_measurand_obs
+        label: "observations"
+        type: checklist
+        points_per_positive: 0
+        negative:
+          - "measurand not named"
+          - "force, mass and pressure mixed up (N, g, Pa)"
+          - "only raw ADC counts or volts, no physical unit"
+          - "units inconsistent between text and graphs"
+        positive:
+          - "measurand named explicitly (force)"
+          - "unit stated, with the g-to-N relation where relevant (1 g is about 9.81 mN)"
+          - "same units used throughout text and graphs"
+
+      - id: an_principle
+        label: "analysis - physical principle (1 pt)"
+        type: slider
+        min: 0
+        max: 1
+        step: 1
+        points: 1
+        description: "The physical principle used for the sensor is described concisely and correctly. Note: much of this text is pre-filled in the template, so look for the student's own explanation of the mechanism."
+
+      - id: an_principle_obs
+        label: "observations"
+        type: checklist
+        points_per_positive: 0
+        negative:
+          - "only the pre-filled template text, no own explanation"
+          - "FSR behaviour described wrongly (e.g. resistance increases with force)"
+          - "strain gauge / Wheatstone bridge not explained"
+          - "not concise (copied datasheet text)"
+        positive:
+          - "resistance drops with force; conductance is closer to linear (motivates the 1/x calibration)"
+          - "strain gauge: strain gives a resistance change, the bridge gives a small differential voltage"
+          - "concise and correct"
+
+      - id: an_reference
+        label: "analysis - the reference (1 pt)"
+        type: slider
+        min: 0
+        max: 1
+        step: 1
+        points: 1
+        description: "The reference used to calibrate the sensor of interest is discussed, including its operating principle. Reference values: single-point 780 g load cell, 4 strain gauges in a bridge on an aluminium yoke, 0.8 mV/V, 780 g maximum."
+
+      - id: an_reference_obs
+        label: "observations"
+        type: checklist
+        points_per_positive: 0
+        negative:
+          - "reference mentioned but operating principle not explained"
+          - "load cell specifications missing or wrong (sensitivity, maximum load)"
+          - "no reason given why the load cell is the better (more linear) sensor"
+          - "no discussion of how the reference itself was calibrated"
+        positive:
+          - "bridge of 4 strain gauges on an aluminium yoke explained"
+          - "specifications quoted correctly with source (0.8 mV/V, 780 g)"
+          - "reference limitations mentioned (datasheet non-linearity, hysteresis, zero balance)"
+
+      - id: an_equations
+        label: "analysis - relevant equations (2 pt)"
+        type: slider
+        min: 0
+        max: 2
+        step: 1
+        points: 2
+        description: "The equations from physical quantity, to electrical signal (voltage), to value in SI units (software), for both the sensor and the reference. Reference values: R_foil = R_pullup / (5 V / V_adc - 1); gain G = 5 + 200 kOhm / R_G = 2005; 0.8 mV/V x 5 V / 780 g = about 5.1 uV/g, so about 10 mV/g at the ADC (about 2 counts/g)."
+
+      - id: an_equations_obs
+        label: "observations"
+        type: checklist
+        points_per_positive: 0
+        negative:
+          - "no chain from force to voltage to ADC count to value in g"
+          - "equations only for one of the two sensors"
+          - "voltage-divider formula wrong or inconsistent with the schematic (resistor numbering)"
+          - "INA122 gain formula missing or wrong"
+          - "ADC conversion (5 V over 1024 counts) missing"
+          - "calibration function not given or not motivated"
+          - "template placeholders left empty (mV/g, gain, etc.)"
+        positive:
+          - "divider equation for R_foil correct and consistent with the schematic"
+          - "INA122 gain computed from the gain resistor (2005 for 100 Ohm)"
+          - "load cell sensitivity chain worked out down to V/g or counts/g"
+          - "calibration function force = A / N + B (linear in conductance) given with the fitted A and B"
+          - "all values with units"
+
+      - id: an_conditioning
+        label: "analysis - conditioning (2 pt)"
+        type: slider
+        min: 0
+        max: 2
+        step: 1
+        points: 2
+        description: "The circuits used for conditioning the sensor signals are described: voltage divider, instrumentation amplifier. The used components are shown in the schematic."
+
+      - id: an_conditioning_obs
+        label: "observations"
+        type: checklist
+        points_per_positive: 0
+        negative:
+          - "schematic missing, or template specimen (potentiometer, 100 nF) left in"
+          - "components not labelled or values missing"
+          - "only one of the two signal paths shown (divider or INA122)"
+          - "gain resistor not identified, or gain not computed"
+          - "figure not referenced in the text"
+        positive:
+          - "schematic shows 100 kOhm pull-up with foil sensor and INA122 with its gain resistor"
+          - "component values and designators match the formulas in the text"
+          - "tolerance of the gain resistor mentioned (effect on gain)"
+          - "figure referenced where discussed"
+
+  # ════════════════════════════════════════════════════════════════
+  # 3. METHOD & SETUP  ·  6 pt  (1+2+1+1+1)
+  # ════════════════════════════════════════════════════════════════
+  - id: method
+    title: "method & setup"
+    fields:
+
+      - id: me_setup
+        label: "method - setup (1 pt)"
+        type: slider
+        min: 0
+        max: 1
+        step: 1
+        points: 1
+        description: "The setup is described: physical aspects where relevant (where the sensor shield is placed, where the hand is, what is pushed), location of the used components on the shield, and the setting of the experiment (room, temperature, at a desk)."
+
+      - id: me_setup_obs
+        label: "observations"
+        type: checklist
+        points_per_positive: 0
+        negative:
+          - "no physical description (hand, finger, how the sensors are loaded)"
+          - "shield drawing missing, generic, or used parts not marked"
+          - "experiment conditions (room, temperature, desk) not mentioned"
+          - "no photo or sketch of the setup"
+        positive:
+          - "annotated shield drawing marking the used components"
+          - "photo or sketch of the setup showing sensors and finger / scale"
+          - "conditions stated (room, approximate temperature, table)"
+
+      - id: me_code
+        label: "method - code (2 pt)"
+        type: slider
+        min: 0
+        max: 2
+        step: 1
+        points: 2
+        description: "The code used for the experiment is described and given. Concise, cleaned-up and minimal; copy-pasting from the reader is not the way to go."
+
+      - id: me_code_obs
+        label: "observations"
+        type: checklist
+        points_per_positive: 0
+        negative:
+          - "code copied from wiki or reader without cleaning"
+          - "long listing with unused parts or no comments"
+          - "constants in the code do not match the values in the text"
+          - "code for one of the two conversions missing"
+          - "listing formatted poorly (large white space, unreadable)"
+        positive:
+          - "short listing covering both conversions (ADC to g)"
+          - "constants (offset, scale, A, B) traceable to the calibration data"
+          - "output suited for plotting (both calibrated values per line)"
+          - "code explained in the text (what it does, sample rate)"
+
+      - id: me_reference
+        label: "method - reference (1 pt)"
+        type: slider
+        min: 0
+        max: 1
+        step: 1
+        points: 1
+        description: "The reference signal, reference measurement or calibration source is described."
+
+      - id: me_reference_obs
+        label: "observations"
+        type: checklist
+        points_per_positive: 0
+        negative:
+          - "no description of how the load cell was calibrated"
+          - "reference weights or scale not specified"
+          - "'calibrated' claimed without any data"
+        positive:
+          - "calibration with known weights or kitchen scale described"
+          - "calibration table with raw ADC value versus reference value"
+          - "accuracy or resolution of the calibration source mentioned"
+
+      - id: me_samples
+        label: "method - samples (1 pt)"
+        type: slider
+        min: 0
+        max: 1
+        step: 1
+        points: 1
+        description: "The number of samples, measurements or series taken is stated."
+
+      - id: me_samples_obs
+        label: "observations"
+        type: checklist
+        points_per_positive: 0
+        negative:
+          - "number of samples or cycles not stated"
+          - "only a single push-release cycle"
+          - "sampling interval / rate not mentioned"
+        positive:
+          - "number of calibration points and number of push-release cycles stated"
+          - "sample rate stated"
+          - "enough cycles to see repeatability (3 or more)"
+
+      - id: me_procedure
+        label: "method - procedure (1 pt)"
+        type: slider
+        min: 0
+        max: 1
+        step: 1
+        points: 1
+        description: "The steps taken, and in which order, are described."
+
+      - id: me_procedure_obs
+        label: "observations"
+        type: checklist
+        points_per_positive: 0
+        negative:
+          - "steps not in order or not reproducible"
+          - "load limit (5 N / 500 g) not mentioned"
+          - "unclear how both sensors were loaded at the same time"
+        positive:
+          - "ordered steps from load cell calibration to foil sensor calibration"
+          - "load limit mentioned and respected"
+          - "push and release speed described"
+
+  # ════════════════════════════════════════════════════════════════
+  # 4. RESULTS  ·  5 pt  (1+1+1+1+1)
+  # ════════════════════════════════════════════════════════════════
+  - id: results
+    title: "results"
+    fields:
+
+      - id: re_time
+        label: "results - time series (1 pt)"
+        type: slider
+        min: 0
+        max: 1
+        step: 1
+        points: 1
+        description: "A clear graph showing the experimental procedure: a number of user interactions (pushes) in time, corresponding to the outlined procedure."
+
+      - id: re_time_obs
+        label: "observations"
+        type: checklist
+        points_per_positive: 0
+        negative:
+          - "no time series shown"
+          - "push-release cycles not recognisable"
+          - "time axis in sample number only, or not in seconds"
+          - "raw counts and grams on one unlabelled axis"
+        positive:
+          - "clear push-release cycles with reference and sensor signals"
+          - "time axis in seconds"
+          - "corresponds to the described procedure"
+
+      - id: re_calibration
+        label: "results - calibration graph (1 pt)"
+        type: slider
+        min: 0
+        max: 1
+        step: 1
+        points: 1
+        description: "A clear graph showing sensor data and reference data. A time series can be added, but the important one is the x-y graph of sensor versus reference."
+
+      - id: re_calibration_obs
+        label: "observations"
+        type: checklist
+        points_per_positive: 0
+        negative:
+          - "no x-y plot, only time series"
+          - "axes swapped (reference belongs on x)"
+          - "no ideal line or fit to judge the deviation"
+          - "unlabelled axes or units"
+        positive:
+          - "x-y plot: calibrated foil sensor versus reference, with units"
+          - "ideal line or fit drawn"
+          - "several cycles visible"
+
+      - id: re_error
+        label: "results - error plot (1 pt)"
+        type: slider
+        min: 0
+        max: 1
+        step: 1
+        points: 1
+        description: "A clear graph showing the error (difference between reference and measured value). The reference value range on the x-axis is better than the time series."
+
+      - id: re_error_obs
+        label: "observations"
+        type: checklist
+        points_per_positive: 0
+        negative:
+          - "no error plot"
+          - "error plotted against time instead of against the reference"
+          - "error definition or sign not stated"
+          - "clipped, out-of-range samples left in without comment"
+        positive:
+          - "error versus reference value, in g"
+          - "valid range indicated or clipped part removed"
+          - "sign convention stated"
+
+      - id: re_nonlinear
+        label: "results - non-linear details (1 pt)"
+        type: slider
+        min: 0
+        max: 1
+        step: 1
+        points: 1
+        description: "Graphs showing relevant details of non-linear behaviour such as hysteresis, or a close-up showing non-uniform resolution."
+
+      - id: re_nonlinear_obs
+        label: "observations"
+        type: checklist
+        points_per_positive: 0
+        negative:
+          - "hysteresis claimed but not shown"
+          - "up and down branches not distinguishable"
+          - "no close-up of non-uniform resolution"
+          - "loop includes the clipped part"
+        positive:
+          - "one clear cycle showing the hysteresis loop"
+          - "up and down branches marked"
+          - "close-up of resolution steps at the high-resistance (low-force) end"
+
+      - id: re_graphing
+        label: "results - graphing quality (1 pt)"
+        type: slider
+        min: 0
+        max: 1
+        step: 1
+        points: 1
+        description: "The graphs show a relevant number of samples, have good scaling, and relevant (SI) units on the axes."
+
+      - id: re_graphing_obs
+        label: "observations"
+        type: checklist
+        points_per_positive: 0
+        negative:
+          - "axis titles or units missing (default chart titles)"
+          - "raw counts and calibrated values mixed on one axis"
+          - "poor scaling, or too few samples"
+          - "units not SI or inconsistent (g versus N)"
+        positive:
+          - "all axes labelled with units"
+          - "sensible scaling and enough samples"
+          - "units consistent with the text"
+
+  # ════════════════════════════════════════════════════════════════
+  # 5. CONCLUSION  ·  6 pt  (1+1+1+1+1+1)
+  # ════════════════════════════════════════════════════════════════
+  - id: conclusion
+    title: "conclusion"
+    fields:
+
+      - id: co_accuracy
+        label: "conclusion - accuracy (1 pt)"
+        type: slider
+        min: 0
+        max: 1
+        step: 1
+        points: 1
+        description: "A meaningful and quantified notion of accuracy, linked to the input/output range of the sensor. The accuracy of the reference is discussed too. The mean and standard deviation of the error tell only part of the story."
+
+      - id: co_accuracy_obs
+        label: "observations"
+        type: checklist
+        points_per_positive: 0
+        negative:
+          - "accuracy given only as the mean error (about zero by construction of the fit)"
+          - "no link to the range (no percentage of full scale)"
+          - "accuracy of the reference not discussed"
+          - "out-of-range samples included without comment"
+        positive:
+          - "worst-case or RMS error given in g and as percentage of full scale"
+          - "accuracy of the reference discussed (load cell specification, kitchen scale)"
+          - "range over which the number holds is stated"
+
+      - id: co_resolution
+        label: "conclusion - resolution (1 pt)"
+        type: slider
+        min: 0
+        max: 1
+        step: 1
+        points: 1
+        description: "A meaningful, quantified notion of resolution, for both the reference and the sensor signal. Non-linearities in resolution are especially important to mention (and calculate). Reference: ADC about 0.49 g/count for the reference; for F = A/N + B the foil resolution is A/N^2 per count, which varies strongly over the range."
+
+      - id: co_resolution_obs
+        label: "observations"
+        type: checklist
+        points_per_positive: 0
+        negative:
+          - "resolution only as ADC bits, not translated to g"
+          - "no value for the foil sensor, or none for the reference"
+          - "single value although the resolution is clearly non-uniform"
+        positive:
+          - "reference resolution in g per count (about 0.49 g)"
+          - "foil resolution calculated at both ends of the range"
+          - "non-uniformity quantified"
+
+      - id: co_precision
+        label: "conclusion - precision (1 pt)"
+        type: slider
+        min: 0
+        max: 1
+        step: 1
+        points: 1
+        description: "Precision can be calculated from multiple measurements of the same thing, giving a (standard) deviation. The standard deviation of the error is related, but a set of samples per measurement is better."
+
+      - id: co_precision_obs
+        label: "observations"
+        type: checklist
+        points_per_positive: 0
+        negative:
+          - "precision confused with accuracy"
+          - "no repeated measurement of the same quantity"
+          - "standard deviation of the error given without noting its limitation"
+        positive:
+          - "standard deviation from repeated samples at the same force"
+          - "standard deviation of the error given, limitation noted"
+          - "number of samples behind the value stated"
+
+      - id: co_range
+        label: "conclusion - range (1 pt)"
+        type: slider
+        min: 0
+        max: 1
+        step: 1
+        points: 1
+        description: "The relevant input and output ranges are stated in meaningful units. If behaviour is linearised or considered linear in a certain range, this is mentioned."
+
+      - id: co_range_obs
+        label: "observations"
+        type: checklist
+        points_per_positive: 0
+        negative:
+          - "range missing or only in raw counts"
+          - "input and output range mixed up"
+          - "usable (linear) range not stated"
+          - "clipping of the reference not mentioned"
+        positive:
+          - "input range in g (or N) and output range in V or counts"
+          - "linear / usable range of the foil sensor stated"
+          - "limit of the reference (saturation near 500 g) mentioned"
+
+      - id: co_nonlin
+        label: "conclusion - non-linearities (1 pt)"
+        type: slider
+        min: 0
+        max: 1
+        step: 1
+        points: 1
+        description: "Non-linearities in the behaviour of the sensor are clearly addressed, preferably with some quantification."
+
+      - id: co_nonlin_obs
+        label: "observations"
+        type: checklist
+        points_per_positive: 0
+        negative:
+          - "only 'it is non-linear', no numbers"
+          - "hysteresis only; other non-linearities (1/x, saturation) ignored"
+          - "no comparison with the datasheet"
+        positive:
+          - "hysteresis quantified in g and as percentage of full scale"
+          - "deviation from a straight line quantified"
+          - "compared with the A101 datasheet (linearity, hysteresis)"
+
+      - id: co_improve
+        label: "conclusion - improvements (1 pt)"
+        type: slider
+        min: 0
+        max: 1
+        step: 1
+        points: 1
+        description: "The bottleneck(s) in the setup are mentioned and, where asked, options for improvement are given. The assignment asks for critical feedback on the process (systematic errors)."
+
+      - id: co_improve_obs
+        label: "observations"
+        type: checklist
+        points_per_positive: 0
+        negative:
+          - "no bottleneck named"
+          - "generic suggestions not linked to the results ('use a better sensor')"
+          - "systematic errors not discussed"
+        positive:
+          - "bottleneck identified from the data (reference clipping, 10-bit ADC at the low-force end, finger versus sensing area)"
+          - "concrete improvement (gain resistor, load concentrator, static calibration points, conditioning cycles)"
+          - "systematic errors named (offset, scale accuracy, temperature, creep)"
+
+  # ════════════════════════════════════════════════════════════════
+  # 6. FORMAT & STRUCTURE  ·  3 pt  (2+1)
+  # ════════════════════════════════════════════════════════════════
+  - id: format
+    title: "format & structure"
+    fields:
+
+      - id: fo_template
+        label: "format - template (2 pt)"
+        type: slider
+        min: 0
+        max: 2
+        step: 1
+        points: 2
+        description: "The template has been followed and used correctly: font, layout, figure numbering, references. No major blank sections or badly copy-pasted resources. No huge white spaces in blocks of code."
+
+      - id: fo_template_obs
+        label: "observations"
+        type: checklist
+        points_per_positive: 0
+        negative:
+          - "template sections missing or restructured"
+          - "template instruction text or specimen figures left in"
+          - "figure numbers inconsistent or duplicated"
+          - "figures without captions or not referenced in the text"
+          - "blank sections"
+          - "large white space in code blocks"
+        positive:
+          - "all template sections completed"
+          - "figures numbered consistently and referenced in the text"
+          - "compact, readable code blocks"
+          - "consistent fonts and layout"
+
+      - id: fo_references
+        label: "format - references (1 pt)"
+        type: slider
+        min: 0
+        max: 1
+        step: 1
+        points: 1
+        description: "Where images, blocks of code or other resources were obtained elsewhere, they are clearly referenced."
+
+      - id: fo_references_obs
+        label: "observations"
+        type: checklist
+        points_per_positive: 0
+        negative:
+          - "datasheets not referenced"
+          - "wiki figures (schematic, shield drawing) used without source"
+          - "code adapted from wiki or reader without attribution"
+        positive:
+          - "datasheets referenced (A101, INA122, load cell)"
+          - "figures from the wiki credited"
+          - "origin of adapted code stated"
+
+  # ════════════════════════════════════════════════════════════════
+  # 7. OVERALL FEEDBACK  ·  no points
+  # ════════════════════════════════════════════════════════════════
+  - id: overall
+    title: "overall feedback"
+    fields:
+
+      - id: overall_note
+        label: "overall feedback for the student"
+        type: textarea
+        placeholder: "Summary: strongest part, most important thing to improve..."
