@@ -40,7 +40,7 @@ projects:
     title: 3D Footprint Generator
     summary: >-
       A python tool taking a 2D image of an animal footprint and generating a 3D model for 3D printing, using OpenCV and OpenSCAD.
-    image: images/footprint3d.jpg
+    image: images/footprint.jpg
     status: working
 
   - repo: sensorproto
