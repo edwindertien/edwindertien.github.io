@@ -25,6 +25,7 @@ projects:
     summary: >-
       The keyboard unit for the tonewheel organ: a Pico scanning a 12x8x2 contact matrix
       and 16 drawbar/control pots, sending USB and DIN MIDI.
+    image: docs/pcb.png
     status: working
 
   - repo: picoLoraSEN66
@@ -34,6 +35,14 @@ projects:
       dashboard, an LCD menu and LoRa telemetry.
     image: docs/loramenu.jpg
     status: working
+
+  - repo: footprint3d
+    title: 3D Footprint Generator
+    summary: >-
+      A python tool taking a 2D image of an animal footprint and generating a 3D model for 3D printing, using OpenCV and OpenSCAD.
+    image: images/footprint3d.jpg
+    status: working
+
 
 # Other repositories, add them above when they are ready to be shown:
 #   InteractiveAudioplayer, NEN3140, animatronics, attinyleslieswitch, cosmicdune,
