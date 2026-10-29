@@ -1,0 +1,70 @@
+/* Project cards: used on the home page and the projects overview. */
+
+.home-intro h1 {
+  margin-bottom: 0.4em;
+}
+
+.home-intro p {
+  max-width: 38rem;
+  font-size: 1.05em;
+}
+
+.project-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
+  gap: 1.25rem;
+  margin: 1.5rem 0;
+}
+
+/* The two featured projects get room: two columns, bigger pictures. */
+.project-grid--featured {
+  grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr));
+  gap: 1.75rem;
+}
+
+.project-card {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  color: inherit;
+  text-decoration: none;
+  border: 1px solid var(--md-default-fg-color--lighter, rgba(0, 0, 0, 0.2));
+  border-radius: 4px;
+  background: var(--md-default-bg-color, transparent);
+}
+
+.project-card:hover,
+.project-card:focus-visible {
+  border-color: var(--md-accent-fg-color, currentColor);
+  color: inherit;
+}
+
+.project-card img,
+.project-card__noimg {
+  display: block;
+  width: 100%;
+  aspect-ratio: 3 / 2;
+  object-fit: cover;
+  margin: 0;
+  background: var(--md-default-fg-color--lightest, rgba(0, 0, 0, 0.08));
+}
+
+.project-grid--featured .project-card img {
+  aspect-ratio: 4 / 3;
+}
+
+.project-card__body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  padding: 0.9rem 1rem 1rem;
+  line-height: 1.45;
+}
+
+.project-card__body strong {
+  font-size: 1.05em;
+}
+
+.project-card__body small {
+  color: var(--md-default-fg-color--light, inherit);
+}

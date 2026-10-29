@@ -1,0 +1,43 @@
+# Projects shown on edwindertien.github.io.
+# Each entry is pulled from github.com/<owner>/<repo>: README.md becomes the project page,
+# context.md (if present) becomes "Developer notes". Order here = order in the menu.
+#
+#   repo:     GitHub repository name (also the URL slug on the site)
+#   title:    name shown in the menu and on the cards
+#   summary:  one or two sentences for the project cards
+#   image:    path of a picture inside the repo (shown on the card; copied automatically)
+#   status:   free text shown on the card (e.g. "working", "prototype")
+#   branch:   optional, defaults to the repository's default branch
+
+owner: edwindertien
+
+projects:
+  - repo: picotonewheel
+    title: Pico Tonewheel Organ
+    summary: >-
+      Hammond-style tonewheel organ sound module on a Raspberry Pi Pico 2: nine drawbars,
+      percussion, overdrive, vibrato, chorus and a stereo Leslie simulation.
+    image: docs/organ.jpg
+    status: working
+
+  - repo: picomidikeyboard
+    title: Tonewheel Organ Keyboard
+    summary: >-
+      The keyboard unit for the tonewheel organ: a Pico scanning a 12x8x2 contact matrix
+      and 16 drawbar/control pots, sending USB and DIN MIDI.
+    status: working
+
+  - repo: picoLoraSEN66
+    title: SEN66 Environmental Monitor
+    summary: >-
+      CO2, VOC, NOx, particulates, temperature and humidity on a Pico W, with a web
+      dashboard, an LCD menu and LoRa telemetry.
+    image: docs/loramenu.jpg
+    status: working
+
+# Other repositories, add them above when they are ready to be shown:
+#   InteractiveAudioplayer, NEN3140, animatronics, attinyleslieswitch, cosmicdune,
+#   eyeinthesky, ezgobridge, fabcam, fablab-dashboard, footprint3d, foundscape,
+#   loraTestStation, picoArtnet2DMX, picoObergransad, picoarm, picocontrolwifi,
+#   picosaber, picoservocontrol, picosynth, picowatch, picowiimote, poppycontrol,
+#   sensorproto, st3215andDXLservoMIDI, supersocotc, usb2midi
