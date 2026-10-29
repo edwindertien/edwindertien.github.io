@@ -43,6 +43,12 @@ projects:
     image: images/footprint3d.jpg
     status: working
 
+  - repo: sensorproto
+    title: universal streaming library for sensors
+    summary: >-
+      A library for streaming data from sensors to a web dashboard or python sketch, with support for multiple protocols and formats. Included mostly sensors connected to Arduino, but also kinect and lidar.
+    image: docs/dashboard_demo.png
+    status: working
 
 # Other repositories, add them above when they are ready to be shown:
 #   InteractiveAudioplayer, NEN3140, animatronics, attinyleslieswitch, cosmicdune,
