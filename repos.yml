@@ -50,12 +50,13 @@ projects:
     image: docs/dashboard_demo.png
     status: working
 
-  - repo: picousb2midi
+  - repo: usb2midi
     title: interface for HID devices to MIDI
     summary: >-
       Firmware for a Raspberry Pi Pico (waveshare board)that converts USB HID devices (like keyboards, mice and gamepads) to MIDI messages, with support for multiple protocols and formats.
     image: resources/spacemouse.jpg
     status: working
+
 # Other repositories, add them above when they are ready to be shown:
 #   InteractiveAudioplayer, NEN3140, animatronics, attinyleslieswitch, cosmicdune,
 #   eyeinthesky, ezgobridge, fabcam, fablab-dashboard, footprint3d, foundscape,
