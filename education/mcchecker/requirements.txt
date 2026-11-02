@@ -1,0 +1,7 @@
+flask>=2.3
+opencv-python-headless>=4.8
+numpy
+pymupdf>=1.23
+pandas
+openpyxl
+odfpy

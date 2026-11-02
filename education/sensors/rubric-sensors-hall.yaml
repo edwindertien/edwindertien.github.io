@@ -1,0 +1,706 @@
+# ══════════════════════════════════════════════════════════════════
+#  RUBRIC DEFINITION - Sensors for Creative Technology
+#  Assignment 6: Magnetic Sensing - Hall-effect rotary position sensor
+#  (two linear Hall sensors + magnet wheel, potentiometer as reference)
+#  ──────────────────────────────────────────────────────────────────
+#  Total points: 30
+#  EU grade: 1 + 9 x (earned / 30)
+#
+#  1. Introduction         3 pt  (1+1+1)
+#  2. Analysis             7 pt  (1+1+1+2+2)
+#  3. Method & setup       6 pt  (1+2+1+1+1)
+#  4. Results              5 pt  (1+1+1+1+1)
+#  5. Conclusion           6 pt  (1+1+1+1+1+1)
+#  6. Format & structure   3 pt  (2+1)
+#
+#  Same architecture as the Assignment 3 rubric: every criterion = one
+#  slider (the points) + one observation checklist (points_per_positive: 0,
+#  so it only generates feedback text and never changes the score).
+#  Use the notes under the checklist for the Canvas 'Comment' field.
+# ══════════════════════════════════════════════════════════════════
+
+title: "Sensors - Hall-effect rotation sensor (Assignment 6)"
+course: "SCT-A6"
+grading: true
+grade_decimals: 1
+
+sections:
+
+  # ════════════════════════════════════════════════════════════════
+  # 1. INTRODUCTION  ·  3 pt  (1+1+1)
+  # ════════════════════════════════════════════════════════════════
+  - id: intro
+    title: "introduction"
+    fields:
+
+      - id: intro_type
+        label: "introduction - sensor type (1 pt)"
+        type: slider
+        min: 0
+        max: 1
+        step: 1
+        points: 1
+        description: "Is the correct sensor type mentioned? (Two linear, ratiometric Hall-effect sensors (A1302 or similar) read out with a wheel of alternating magnets, and a potentiometer as reference.)"
+
+      - id: intro_type_obs
+        label: "observations"
+        type: checklist
+        points_per_positive: 0
+        negative:
+          - "sensor type missing or vague (only 'an angle sensor')"
+          - "only the Hall sensors, or only the potentiometer, named"
+          - "wrong sensor type (e.g. optical encoder, or a Hall switch / latch instead of a linear Hall sensor)"
+        positive:
+          - "linear (ratiometric) Hall-effect sensor named, together with the magnet wheel"
+          - "potentiometer named as the reference"
+
+      - id: intro_principle
+        label: "introduction - physical principle (1 pt)"
+        type: slider
+        min: 0
+        max: 1
+        step: 1
+        points: 1
+        description: "Is the physical measurement principle mentioned?"
+
+      - id: intro_principle_obs
+        label: "observations"
+        type: checklist
+        points_per_positive: 0
+        negative:
+          - "no physical principle mentioned"
+          - "principle given for only one of the two sensors (Hall or potentiometer)"
+          - "describes the electronics or the process instead of the physics"
+        positive:
+          - "Hall effect: a magnetic field gives an output voltage proportional to the flux density"
+          - "two sensors with a 90 degree phase difference give a sine / cosine pair from which the angle follows"
+          - "potentiometer: wiper voltage proportional to the angle"
+
+      - id: intro_goal
+        label: "introduction - measurement goal (1 pt)"
+        type: slider
+        min: 0
+        max: 1
+        step: 1
+        points: 1
+        description: "Is the goal clearly stated, without irrelevant (process-related) information?"
+
+      - id: intro_goal_obs
+        label: "observations"
+        type: checklist
+        points_per_positive: 0
+        negative:
+          - "goal missing or unclear"
+          - "goal buried in a description of what was done or which hardware was handed out"
+          - "goal is only 'to do the assignment'"
+        positive:
+          - "goal stated in one or two sentences (implement and characterise the Hall-effect angle sensor with the potentiometer as reference)"
+          - "properties to be determined are named (angular range, resolution, precision, accuracy)"
+
+  # ════════════════════════════════════════════════════════════════
+  # 2. ANALYSIS  ·  7 pt  (1+1+1+2+2)
+  # ════════════════════════════════════════════════════════════════
+  - id: analysis
+    title: "analysis"
+    fields:
+
+      - id: an_measurand
+        label: "analysis - measurand (1 pt)"
+        type: slider
+        min: 0
+        max: 1
+        step: 1
+        points: 1
+        description: "It is clearly described what is measured: which physical quantity and in which units. Reference: the rotation angle of the wheel (mechanical angle, in degrees) over the total range (270 degrees for the 9-magnet wheel). One magnet transition is 360 electrical degrees, which is two magnet pitches (67.5 mechanical degrees), so electrical and mechanical angle must not be mixed up."
+
+      - id: an_measurand_obs
+        label: "observations"
+        type: checklist
+        points_per_positive: 0
+        negative:
+          - "measurand not named"
+          - "mechanical and electrical angle mixed up (a transition is 360 electrical degrees, not 360 mechanical degrees)"
+          - "only raw ADC counts or volts, no angle unit"
+          - "degrees and radians mixed, or units inconsistent between text and graphs"
+        positive:
+          - "measurand named explicitly (rotation angle of the wheel)"
+          - "unit stated (degrees) with the relation between electrical and mechanical angle (360 electrical degrees = 2 magnet pitches = 67.5 degrees for 9 magnets over 270 degrees)"
+          - "same units used throughout text and graphs"
+
+      - id: an_principle
+        label: "analysis - physical principle (1 pt)"
+        type: slider
+        min: 0
+        max: 1
+        step: 1
+        points: 1
+        description: "The physical principle used for the sensor is described concisely and correctly: Hall effect with magnets of alternating polarity, a linear ratiometric output around half the supply voltage, and why two sensors with a phase offset give a sine / cosine pair. Note: part of this text is pre-filled in the template, so look for the student's own explanation."
+
+      - id: an_principle_obs
+        label: "observations"
+        type: checklist
+        points_per_positive: 0
+        negative:
+          - "only the pre-filled template text, no own explanation"
+          - "alternating polarity of the magnets not mentioned, so the period per transition is unexplained"
+          - "Hall sensor described wrongly (e.g. output proportional to the magnet position, or a switching output instead of a linear one)"
+          - "phase difference not explained (sensor distance versus magnet distance, see the figure with D_sensor and D_magnet)"
+          - "not concise (copied datasheet text)"
+        positive:
+          - "output voltage proportional to the field through the sensor, quiescent output at half the supply, ratiometric"
+          - "magnets alternate N / S, so one transition (360 electrical degrees) spans two magnet pitches"
+          - "sensor spacing equals one transition plus 90 degrees, which gives the sine / cosine pair"
+          - "concise and correct"
+
+      - id: an_reference
+        label: "analysis - the reference (1 pt)"
+        type: slider
+        min: 0
+        max: 1
+        step: 1
+        points: 1
+        description: "The reference used to characterise the sensor is discussed, including its operating principle and its limits. Reference values: rotary potentiometer 10 kOhm, wiper voltage proportional to the angle; effective (electrical) angle about 252 degrees for the full output swing (the mechanical stop of the RK09K family is about 280 degrees); read with the 10-bit ADC, which is 0.25 degrees per count."
+
+      - id: an_reference_obs
+        label: "observations"
+        type: checklist
+        points_per_positive: 0
+        negative:
+          - "reference mentioned but operating principle not explained (resistive divider with a wiper)"
+          - "potentiometer specifications missing or wrong (electrical angle, resistance, taper)"
+          - "no discussion of the limits of the reference (electrical versus mechanical angle, linearity tolerance, ADC resolution)"
+          - "no discussion of how the potentiometer angle is aligned with the wheel angle (zero offset, angle range)"
+        positive:
+          - "wiper of the 10 kOhm potentiometer as a voltage divider explained"
+          - "specifications quoted correctly with source (effective electrical angle, linear taper)"
+          - "reference limitations mentioned (electrical angle smaller than the wheel range, 0.25 degrees per ADC count, linearity)"
+          - "alignment of the two angle scales discussed"
+
+      - id: an_equations
+        label: "analysis - relevant equations (2 pt)"
+        type: slider
+        min: 0
+        max: 2
+        step: 1
+        points: 2
+        description: "The equations from physical quantity, to electrical signal (voltage), to value in degrees (software), for both the sensor and the reference. Reference values: about 480 G at the sensor (field calculator, N45 magnet 4 x 1.5 mm) x 1.3 mV/G = about 0.62 V swing around 2.5 V = about 245 ADC counts peak-to-peak (a quarter of the ADC range); x = (A4 - mid) / amplitude, y = (A5 - mid) / amplitude; theta_el = atan2(y, x); unwrapping by adding or subtracting 360 at every jump; theta = summed electrical angle x 270 / 1440 for 9 magnets (4 transitions); reference angle = 252 x ADC / 1023."
+
+      - id: an_equations_obs
+        label: "observations"
+        type: checklist
+        points_per_positive: 0
+        negative:
+          - "no chain from field to voltage to ADC count to angle"
+          - "equations only for one of the two sensors"
+          - "arctan(y / x) used where atan2 is needed (quadrant lost), or the two signals swapped or not offset-corrected"
+          - "transition counting (unwrapping) not given"
+          - "scaling from summed electrical angle to mechanical angle missing or inverted (multiply versus divide)"
+          - "expected voltage swing from sensitivity and field calculator not given"
+          - "template placeholders left empty ([n], [deg], [mV/gauss])"
+        positive:
+          - "sensitivity and field combined to the expected swing in mV and in ADC counts"
+          - "angle within one transition from atan2 of the two offset-corrected signals"
+          - "unwrapping rule and scaling to mechanical degrees correct and consistent with the code"
+          - "reference angle equation with the datasheet value of the potentiometer"
+          - "all values with units"
+
+      - id: an_conditioning
+        label: "analysis - conditioning (2 pt)"
+        type: slider
+        min: 0
+        max: 2
+        step: 1
+        points: 2
+        description: "The circuits used for conditioning the sensor signals are described: supply and output of the Hall sensors, the potentiometer divider, the ADC inputs (A4, A5, A0). The expected use of the ADC range is discussed (the signals only occupy a small part of 0-5 V) and the offset and amplitude correction (centre at 2.5 V, normalisation) is explained. The used components are shown in the schematic."
+
+      - id: an_conditioning_obs
+        label: "observations"
+        type: checklist
+        points_per_positive: 0
+        negative:
+          - "schematic missing, or template specimen left in"
+          - "components or pin numbers (A4, A5, A0) not labelled"
+          - "only one of the two signal paths shown (Hall sensors or potentiometer)"
+          - "fraction of the ADC range that is used not estimated"
+          - "offset (2.5 V centre) and amplitude not discussed, a fixed value of 512 assumed without comment"
+          - "figure not referenced in the text"
+        positive:
+          - "schematic shows both Hall sensors on A4 and A5 and the potentiometer on A0"
+          - "component values and designators match the text"
+          - "expected swing compared with the ADC range (about 245 of 1023 counts)"
+          - "ratiometric output read by a ratiometric ADC (supply variations cancel), and tolerance of quiescent output and sensitivity mentioned"
+          - "figure referenced where discussed"
+
+  # ════════════════════════════════════════════════════════════════
+  # 3. METHOD & SETUP  ·  6 pt  (1+2+1+1+1)
+  # ════════════════════════════════════════════════════════════════
+  - id: method
+    title: "method & setup"
+    fields:
+
+      - id: me_setup
+        label: "method - setup (1 pt)"
+        type: slider
+        min: 0
+        max: 1
+        step: 1
+        points: 1
+        description: "The setup is described: physical aspects (the wheel with its number of magnets and their spacing, the distance between magnets and sensors, how the wheel is turned, where the potentiometer sits), location of the used components on the shield, and the setting of the experiment (room, temperature, at a desk)."
+
+      - id: me_setup_obs
+        label: "observations"
+        type: checklist
+        points_per_positive: 0
+        negative:
+          - "no physical description (wheel, magnets, air gap, how it is rotated)"
+          - "shield drawing missing, generic, or used parts not marked"
+          - "number of magnets, spacing or air gap not stated"
+          - "experiment conditions (room, temperature, desk) not mentioned"
+          - "no photo or sketch of the wheel and the magnet placement"
+        positive:
+          - "annotated shield drawing marking the Hall sensors and the potentiometer"
+          - "wheel drawing or photo with the number of magnets, spacing (33.75 degrees for 9 magnets over 270 degrees) and air gap"
+          - "conditions stated (room, approximate temperature, table)"
+          - "how the wheel was turned (by hand, slowly) described"
+
+      - id: me_code
+        label: "method - code (2 pt)"
+        type: slider
+        min: 0
+        max: 2
+        step: 1
+        points: 2
+        description: "The code used for the experiment is described and given. Concise, cleaned-up and minimal; copy-pasting from the reader is not the way to go. The code outputs the computed angle and the reference angle."
+
+      - id: me_code_obs
+        label: "observations"
+        type: checklist
+        points_per_positive: 0
+        negative:
+          - "code copied from the reader or wiki without cleaning"
+          - "long listing with unused parts or no comments"
+          - "constants or formulas in the code do not match the text (offset, scaling 270/1440, atan2 argument order)"
+          - "code for the angle or for the reference conversion missing"
+          - "no unwrapping (transition counting) in the code"
+          - "listing formatted poorly (large white space, unreadable)"
+        positive:
+          - "short listing covering both conversions (Hall angle and potentiometer angle per line)"
+          - "unwrapping and scaling visible and matching the text"
+          - "constants (centre, amplitude, scale) traceable to the data"
+          - "code explained in the text (what it does, sample rate)"
+
+      - id: me_reference
+        label: "method - reference (1 pt)"
+        type: slider
+        min: 0
+        max: 1
+        step: 1
+        points: 1
+        description: "The reference signal, reference measurement or calibration source is described."
+
+      - id: me_reference_obs
+        label: "observations"
+        type: checklist
+        points_per_positive: 0
+        negative:
+          - "no description of how the potentiometer angle is obtained (range, offset)"
+          - "zero position of wheel and potentiometer not aligned, or the alignment not described"
+          - "potentiometer range taken from the datasheet without checking it against the wheel range"
+          - "'calibrated' claimed without any data"
+        positive:
+          - "potentiometer conversion with the effective angle from the datasheet"
+          - "alignment (offset and scale) of the reference and the sensor angle determined from the data"
+          - "accuracy or resolution of the reference mentioned (0.25 degrees per count, linearity)"
+
+      - id: me_samples
+        label: "method - samples (1 pt)"
+        type: slider
+        min: 0
+        max: 1
+        step: 1
+        points: 1
+        description: "The number of samples, measurements or series taken is stated."
+
+      - id: me_samples_obs
+        label: "observations"
+        type: checklist
+        points_per_positive: 0
+        negative:
+          - "number of swings or samples not stated"
+          - "only a single swing"
+          - "sampling interval / rate not mentioned"
+          - "no static points or sorted data for the precision"
+        positive:
+          - "number of swings and direction (up and down) stated"
+          - "sample rate stated"
+          - "enough swings to see repeatability (3 or more)"
+          - "number of samples behind the precision value stated"
+
+      - id: me_procedure
+        label: "method - procedure (1 pt)"
+        type: slider
+        min: 0
+        max: 1
+        step: 1
+        points: 1
+        description: "The steps taken, and in which order, are described."
+
+      - id: me_procedure_obs
+        label: "observations"
+        type: checklist
+        points_per_positive: 0
+        negative:
+          - "steps not in order or not reproducible"
+          - "rotation speed or direction not described"
+          - "unclear how the starting position and the transition count were initialised"
+          - "end stops of the potentiometer or the wheel range not mentioned"
+        positive:
+          - "ordered steps from raw signals to calibrated angle"
+          - "slow, repeated swings over the full range, in both directions"
+          - "starting position and initial segment defined"
+          - "precision measured at fixed angles (holds) or by sorting the data"
+
+  # ════════════════════════════════════════════════════════════════
+  # 4. RESULTS  ·  5 pt  (1+1+1+1+1)
+  # ════════════════════════════════════════════════════════════════
+  - id: results
+    title: "results"
+    fields:
+
+      - id: re_time
+        label: "results - time series (1 pt)"
+        type: slider
+        min: 0
+        max: 1
+        step: 1
+        points: 1
+        description: "A clear graph showing the experimental procedure: the raw values of the two Hall sensors and the potentiometer in time over a number of swings, corresponding to the outlined procedure. The raw values show how much of the ADC range is used."
+
+      - id: re_time_obs
+        label: "observations"
+        type: checklist
+        points_per_positive: 0
+        negative:
+          - "no time series of the raw values shown"
+          - "swings not recognisable"
+          - "time axis in sample number only, or not in seconds"
+          - "raw counts and degrees on one unlabelled axis"
+          - "the two Hall signals not distinguishable"
+        positive:
+          - "raw A4, A5 and potentiometer in one graph, clear swings"
+          - "time axis in seconds"
+          - "used part of the ADC range visible (about 400-600 counts)"
+          - "corresponds to the described procedure"
+
+      - id: re_calibration
+        label: "results - calibration graph (1 pt)"
+        type: slider
+        min: 0
+        max: 1
+        step: 1
+        points: 1
+        description: "A clear graph showing sensor data and reference data. A time series can be added, but the important one is the x-y graph of the calculated angle versus the potentiometer angle."
+
+      - id: re_calibration_obs
+        label: "observations"
+        type: checklist
+        points_per_positive: 0
+        negative:
+          - "no x-y plot, only time series"
+          - "axes swapped (reference belongs on x)"
+          - "no ideal line (y = x) to judge the deviation"
+          - "unlabelled axes or units"
+          - "offset between the two angle scales not corrected"
+        positive:
+          - "x-y plot: calculated angle versus reference angle, in degrees"
+          - "ideal line drawn"
+          - "several swings visible"
+          - "calculated angle and reference also shown in one time series"
+
+      - id: re_error
+        label: "results - error plot (1 pt)"
+        type: slider
+        min: 0
+        max: 1
+        step: 1
+        points: 1
+        description: "A clear graph showing the error (difference between reference and measured value). The reference angle range on the x-axis is better than the time series."
+
+      - id: re_error_obs
+        label: "observations"
+        type: checklist
+        points_per_positive: 0
+        negative:
+          - "no error plot"
+          - "error plotted against time instead of against the reference angle"
+          - "error definition or sign not stated"
+          - "edges of the range (where the reference saturates) not commented"
+        positive:
+          - "error versus reference angle, in degrees"
+          - "valid range indicated, or the edges explained"
+          - "sign convention stated"
+          - "periodic pattern with the magnet pitch visible or discussed"
+
+      - id: re_nonlinear
+        label: "results - non-ideal details (1 pt)"
+        type: slider
+        min: 0
+        max: 1
+        step: 1
+        points: 1
+        description: "Graphs showing relevant details of non-ideal behaviour: the x-y (Lissajous) plot of the two Hall signals (a circle when offsets, amplitudes and the 90 degree phase are right), the error within one magnet transition, or a close-up showing the resolution steps. (Hysteresis is not asked in this assignment.)"
+
+      - id: re_nonlinear_obs
+        label: "observations"
+        type: checklist
+        points_per_positive: 0
+        negative:
+          - "non-ideal behaviour claimed (bumps, edge errors) but not shown"
+          - "no x-y plot of the two Hall signals"
+          - "no close-up of one or two transitions"
+          - "bumps visible in the angle but not analysed"
+        positive:
+          - "Lissajous plot of A4 against A5 showing offset, ellipse or distortion"
+          - "close-up of a few transitions with the error pattern"
+          - "close-up of the angle steps at slow rotation (resolution)"
+
+      - id: re_graphing
+        label: "results - graphing quality (1 pt)"
+        type: slider
+        min: 0
+        max: 1
+        step: 1
+        points: 1
+        description: "The graphs show a relevant number of samples, have good scaling, and relevant (SI) units on the axes (degrees, seconds, counts or volts)."
+
+      - id: re_graphing_obs
+        label: "observations"
+        type: checklist
+        points_per_positive: 0
+        negative:
+          - "axis titles or units missing (default chart titles)"
+          - "raw counts and angles mixed on one axis"
+          - "poor scaling, or too few samples"
+          - "units not consistent with the text (degrees versus radians, electrical versus mechanical)"
+        positive:
+          - "all axes labelled with units"
+          - "sensible scaling and enough samples"
+          - "units consistent with the text"
+
+  # ════════════════════════════════════════════════════════════════
+  # 5. CONCLUSION  ·  6 pt  (1+1+1+1+1+1)
+  # ════════════════════════════════════════════════════════════════
+  - id: conclusion
+    title: "conclusion"
+    fields:
+
+      - id: co_accuracy
+        label: "conclusion - accuracy (1 pt)"
+        type: slider
+        min: 0
+        max: 1
+        step: 1
+        points: 1
+        description: "A meaningful and quantified notion of accuracy, linked to the angular range of the sensor. The accuracy of the reference is discussed too. The mean and standard deviation of the error tell only part of the story: look for the worst-case error, and the error in the middle of the range versus the edges."
+
+      - id: co_accuracy_obs
+        label: "observations"
+        type: checklist
+        points_per_positive: 0
+        negative:
+          - "accuracy given only as the mean error (close to zero by symmetry)"
+          - "no link to the range (no percentage of the 270 degrees)"
+          - "accuracy of the reference (linearity, ADC step, electrical angle) not discussed"
+          - "edge errors (outside the valid reference range) included without comment"
+        positive:
+          - "worst-case or RMS error in degrees and as percentage of the range"
+          - "accuracy of the reference discussed (potentiometer linearity, 0.25 degrees per count)"
+          - "range over which the number holds is stated"
+          - "error without the edge region also given"
+
+      - id: co_resolution
+        label: "conclusion - resolution (1 pt)"
+        type: slider
+        min: 0
+        max: 1
+        step: 1
+        points: 1
+        description: "A meaningful, quantified notion of resolution, for both the reference and the sensor signal. Pay attention to the voltage range that the Hall sensors actually use. Reference: potentiometer 252 / 1023 = 0.25 degrees per count; Hall signals: a swing of about 245 counts (a quarter of the ADC range); a single-signal estimate gives 270 / 960 = 0.28 degrees; with two signals and atan2 the electrical resolution is about 1 / A radians (A = amplitude in counts, about 120), which is about 0.1 mechanical degrees."
+
+      - id: co_resolution_obs
+        label: "observations"
+        type: checklist
+        points_per_positive: 0
+        negative:
+          - "resolution only as ADC bits or counts, not translated to degrees"
+          - "voltage range actually used (about 0.6 V around 2.5 V) not taken into account: 10 bit assumed over the full range"
+          - "no value for the Hall angle, or none for the reference"
+          - "resolution of the reference not compared with that of the sensor"
+          - "single-signal estimate used without discussing the effect of combining two signals"
+        positive:
+          - "reference resolution in degrees per count (about 0.25 degrees)"
+          - "used ADC range translated into degrees per count for the Hall signals"
+          - "effective resolution with atan2 derived or measured from the data (smallest step at slow rotation)"
+          - "limit of the reference as measurement instrument mentioned"
+
+      - id: co_precision
+        label: "conclusion - precision (1 pt)"
+        type: slider
+        min: 0
+        max: 1
+        step: 1
+        points: 1
+        description: "Precision can be calculated from multiple measurements of the same thing (the same angle), giving a (standard) deviation. The standard deviation of the error is related, but repeated readings at fixed angles, or the sorted data at a number of angles, is better."
+
+      - id: co_precision_obs
+        label: "observations"
+        type: checklist
+        points_per_positive: 0
+        negative:
+          - "precision confused with accuracy (standard deviation of the error over the whole range called precision)"
+          - "no repeated measurement at the same angle"
+          - "standard deviation of the error given without noting its limitation (it contains systematic errors per transition)"
+        positive:
+          - "standard deviation of repeated readings at fixed angles (static holds) or of sorted data per angle bin"
+          - "noise in ADC counts translated into degrees"
+          - "number of samples behind the value stated"
+
+      - id: co_range
+        label: "conclusion - range (1 pt)"
+        type: slider
+        min: 0
+        max: 1
+        step: 1
+        points: 1
+        description: "The relevant input and output ranges are stated in meaningful units: the angular range of the sensor (270 degrees in the reference, with number of magnets and transitions), the range of the reference, and the output voltage range of the Hall sensors. If the behaviour is only valid in a certain range, this is mentioned."
+
+      - id: co_range_obs
+        label: "observations"
+        type: checklist
+        points_per_positive: 0
+        negative:
+          - "range missing or only in raw counts"
+          - "angular range of the wheel and of the potentiometer mixed up"
+          - "range of one transition (unambiguous angle) not distinguished from the total range (needs counting)"
+          - "voltage range of the Hall sensors (used part of 0-5 V) not stated"
+        positive:
+          - "total angular range in degrees, with number of magnets and transitions"
+          - "range per transition (67.5 mechanical degrees for 9 magnets) mentioned"
+          - "output swing of the Hall sensors in V and in counts"
+          - "reference range (252 degrees electrical) compared with the wheel range (270 degrees)"
+          - "limit of the tracking mentioned (count lost when turned too fast or after a power cycle)"
+
+      - id: co_nonlin
+        label: "conclusion - non-linearities (1 pt)"
+        type: slider
+        min: 0
+        max: 1
+        step: 1
+        points: 1
+        description: "Non-linearities and systematic errors in the behaviour of the sensor are clearly addressed, preferably with some quantification: the bumps between magnet transitions, the effect of the 2.5 V offset, amplitude mismatch and phase error, the edges of the range."
+
+      - id: co_nonlin_obs
+        label: "observations"
+        type: checklist
+        points_per_positive: 0
+        negative:
+          - "only 'it is not perfect', no numbers"
+          - "bumps seen but no explanation (offset, amplitude, phase, field shape) given"
+          - "edge errors attributed to the sensor without checking the range of the reference"
+          - "no comparison with an expectation (theory or datasheet)"
+        positive:
+          - "error pattern per magnet transition quantified (peak-to-peak in degrees, period 67.5 degrees)"
+          - "cause identified from the Lissajous plot (offset, unequal amplitude, phase error)"
+          - "edge effect explained by the reference (252 versus 270 degrees)"
+          - "compared with the datasheet (sensitivity tolerance, quiescent output error)"
+
+      - id: co_improve
+        label: "conclusion - improvements (1 pt)"
+        type: slider
+        min: 0
+        max: 1
+        step: 1
+        points: 1
+        description: "The bottleneck(s) in the setup are mentioned and, where asked, options for improvement are given. The assignment asks for critical feedback on the process (systematic errors). Candidates: calibrating offset, amplitude and phase of each sensor, a look-up table or ellipse correction, more gain to use more of the ADC range, a smaller air gap or stronger field, a better reference (higher resolution, averaging)."
+
+      - id: co_improve_obs
+        label: "observations"
+        type: checklist
+        points_per_positive: 0
+        negative:
+          - "no bottleneck named"
+          - "generic suggestions not linked to the results ('use a better sensor')"
+          - "systematic errors not discussed"
+          - "the limited resolution of the reference as a bottleneck not mentioned"
+        positive:
+          - "bottleneck identified from the data (used ADC range, bumps per transition, edge error, resolution of the potentiometer)"
+          - "concrete improvement (min / max calibration, ellipse correction, look-up table, amplifier or smaller gap)"
+          - "systematic errors named (offset, amplitude mismatch, phase, alignment, temperature)"
+
+  # ════════════════════════════════════════════════════════════════
+  # 6. FORMAT & STRUCTURE  ·  3 pt  (2+1)
+  # ════════════════════════════════════════════════════════════════
+  - id: format
+    title: "format & structure"
+    fields:
+
+      - id: fo_template
+        label: "format - template (2 pt)"
+        type: slider
+        min: 0
+        max: 2
+        step: 1
+        points: 2
+        description: "The template has been followed and used correctly: font, layout, figure numbering, references. No major blank sections or badly copy-pasted resources. No huge white spaces in blocks of code."
+
+      - id: fo_template_obs
+        label: "observations"
+        type: checklist
+        points_per_positive: 0
+        negative:
+          - "template sections missing or restructured"
+          - "template instruction text or specimen figures left in"
+          - "figure numbers inconsistent or duplicated"
+          - "figures without captions or not referenced in the text"
+          - "blank sections"
+          - "large white space in code blocks"
+        positive:
+          - "all template sections completed"
+          - "figures numbered consistently and referenced in the text"
+          - "compact, readable code blocks"
+          - "consistent fonts and layout"
+
+      - id: fo_references
+        label: "format - references (1 pt)"
+        type: slider
+        min: 0
+        max: 1
+        step: 1
+        points: 1
+        description: "Where images, blocks of code or other resources were obtained elsewhere, they are clearly referenced."
+
+      - id: fo_references_obs
+        label: "observations"
+        type: checklist
+        points_per_positive: 0
+        negative:
+          - "datasheets not referenced (Hall sensor, magnet, potentiometer)"
+          - "wiki figures (schematic, shield drawing, wheel figure) used without source"
+          - "field simulation screenshot used without naming the calculator"
+          - "code adapted from wiki or reader without attribution"
+        positive:
+          - "datasheets referenced (Hall sensor, magnet, potentiometer)"
+          - "field calculator and wiki figures credited"
+          - "origin of adapted code stated"
+
+  # ════════════════════════════════════════════════════════════════
+  # 7. OVERALL FEEDBACK  ·  no points
+  # ════════════════════════════════════════════════════════════════
+  - id: overall
+    title: "overall feedback"
+    fields:
+
+      - id: overall_note
+        label: "overall feedback for the student"
+        type: textarea
+        placeholder: "Summary: strongest part, most important thing to improve..."
