@@ -35,7 +35,7 @@ jobs:
       - run: zensical build --clean
       - name: Add the static tools (served as they are, outside the generated site)
         run: |
-          for dir in rubrictool; do   # add more folders here if needed
+          for dir in education; do   # add more folders here if needed
             cp -r "$dir" site/
           done
       - uses: actions/upload-pages-artifact@v5
