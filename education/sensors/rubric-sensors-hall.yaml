@@ -111,7 +111,7 @@ sections:
         max: 1
         step: 1
         points: 1
-        description: "It is clearly described what is measured: which physical quantity and in which units. Reference: the rotation angle of the wheel (mechanical angle, in degrees) over the total range (270 degrees for the 9-magnet wheel). One magnet transition is 360 electrical degrees, which is two magnet pitches (67.5 mechanical degrees), so electrical and mechanical angle must not be mixed up."
+        description: "It is clearly described what is measured: which physical quantity and in which units. Reference: the rotation angle of the wheel (mechanical angle, in degrees) over the total range (270 to 280 degrees). One magnet transition (one wave) is 360 electrical degrees, which is two magnet pitches: 67.5 degrees for the 33.75 degree pitch of the wheel (9 magnets spread over 270 degrees; 360/9 = 40 degrees is not the pitch), so electrical and mechanical angle must not be mixed up."
 
       - id: an_measurand_obs
         label: "observations"
@@ -159,7 +159,7 @@ sections:
         max: 1
         step: 1
         points: 1
-        description: "The reference used to characterise the sensor is discussed, including its operating principle and its limits. Reference values: rotary potentiometer 10 kOhm, wiper voltage proportional to the angle; effective (electrical) angle about 252 degrees for the full output swing (the mechanical stop of the RK09K family is about 280 degrees); read with the 10-bit ADC, which is 0.25 degrees per count."
+        description: "The reference used to characterise the sensor is discussed, including its operating principle and its limits. Reference values (Alps RK09K1130AH1, taper B = linear): 10 kOhm, wiper voltage proportional to the angle; mechanical travel 280 +/- 5 degrees; the taper curve in the datasheet is flat near 0 % below about 28 degrees and near 100 % above about 252 degrees (nominal electrical range about 224 degrees), and the datasheet only guarantees 40-60 % at 140 degrees; comparing the wave period of the wheel (67.5 degrees) with the apparent period on a 280 degree scale gives an electrical range of about 225-235 degrees, in line with the curve; read with the 10-bit ADC, 0.27 degrees per count if 280 degrees is assumed. Strict reading (Edwin, 2026-11-03): the point is only given when the electrical range is recognised as different from the mechanical travel (nominal 28 to 252 degrees) and used (in the conversion, the usable range or the limits); a description with the mechanical 280 degrees only earns 0, also when the wiper principle is explained."
 
       - id: an_reference_obs
         label: "observations"
@@ -172,8 +172,8 @@ sections:
           - "no discussion of how the potentiometer angle is aligned with the wheel angle (zero offset, angle range)"
         positive:
           - "wiper of the 10 kOhm potentiometer as a voltage divider explained"
-          - "specifications quoted correctly with source (effective electrical angle, linear taper)"
-          - "reference limitations mentioned (electrical angle smaller than the wheel range, 0.25 degrees per ADC count, linearity)"
+          - "specifications quoted correctly with source (mechanical travel 280 degrees, electrical range, linear taper)"
+          - "reference limitations mentioned (electrical range smaller than the mechanical travel, flat output at both ends, 0.25 degrees per ADC count, linearity)"
           - "alignment of the two angle scales discussed"
 
       - id: an_equations
@@ -183,7 +183,7 @@ sections:
         max: 2
         step: 1
         points: 2
-        description: "The equations from physical quantity, to electrical signal (voltage), to value in degrees (software), for both the sensor and the reference. Reference values: about 480 G at the sensor (field calculator, N45 magnet 4 x 1.5 mm) x 1.3 mV/G = about 0.62 V swing around 2.5 V = about 245 ADC counts peak-to-peak (a quarter of the ADC range); x = (A4 - mid) / amplitude, y = (A5 - mid) / amplitude; theta_el = atan2(y, x); unwrapping by adding or subtracting 360 at every jump; theta = summed electrical angle x 270 / 1440 for 9 magnets (4 transitions); reference angle = 252 x ADC / 1023."
+        description: "The equations from physical quantity, to electrical signal (voltage), to value in degrees (software), for both the sensor and the reference. Reference values (A1302, 1.3 mV/G; an A1301 has 2.5 mV/G, so twice the swing; both types are in use and students have to check which one they have): about 480 G at the sensor (field calculator, N45 magnet 4 x 1.5 mm) x 1.3 mV/G = about 0.62 V swing around 2.5 V = about 245 ADC counts peak-to-peak (a quarter of the ADC range); x = (A4 - mid) / amplitude, y = (A5 - mid) / amplitude; theta_el = atan2(y, x); unwrapping by adding or subtracting 360 at every jump; theta = summed electrical angle x 270 / 1440 (67.5 degrees per wave, 4 transitions for 9 magnets over 270 degrees); reference angle = 280 x ADC / 1023 (or 28 + 224 x ADC / 1023 for the nominal electrical range)."
 
       - id: an_equations_obs
         label: "observations"
@@ -198,7 +198,7 @@ sections:
           - "expected voltage swing from sensitivity and field calculator not given"
           - "template placeholders left empty ([n], [deg], [mV/gauss])"
         positive:
-          - "sensitivity and field combined to the expected swing in mV and in ADC counts"
+          - "sensitivity and field combined to the expected swing in mV and in ADC counts, compared with the measured swing (right sensitivity for the sensor type: A1301 2.5 mV/G, A1302 1.3 mV/G)"
           - "angle within one transition from atan2 of the two offset-corrected signals"
           - "unwrapping rule and scaling to mechanical degrees correct and consistent with the code"
           - "reference angle equation with the datasheet value of the potentiometer"
@@ -211,7 +211,7 @@ sections:
         max: 2
         step: 1
         points: 2
-        description: "The circuits used for conditioning the sensor signals are described: supply and output of the Hall sensors, the potentiometer divider, the ADC inputs (A4, A5, A0). The expected use of the ADC range is discussed (the signals only occupy a small part of 0-5 V) and the offset and amplitude correction (centre at 2.5 V, normalisation) is explained. The used components are shown in the schematic."
+        description: "The circuits used for conditioning the sensor signals are described: supply and output of the Hall sensors, the potentiometer divider, the ADC inputs (A4, A5, A0). The expected use of the ADC range is discussed (the signals only occupy a small part of 0-5 V) and the offset and amplitude correction (centre at 2.5 V, normalisation) is explained. The used components are shown in the schematic. Strict reading: 2 points need the centre and amplitude of each sensor determined from the data (not a fixed 512) together with the used ADC range compared with the expected swing; with a fixed 512 at most 1."
 
       - id: an_conditioning_obs
         label: "observations"
@@ -227,9 +227,10 @@ sections:
         positive:
           - "schematic shows both Hall sensors on A4 and A5 and the potentiometer on A0"
           - "component values and designators match the text"
-          - "expected swing compared with the ADC range (about 245 of 1023 counts)"
+          - "expected swing compared with the ADC range and with the measured swing (about 245 of 1023 counts for an A1302)"
           - "ratiometric output read by a ratiometric ADC (supply variations cancel), and tolerance of quiescent output and sensitivity mentioned"
           - "figure referenced where discussed"
+          - "centre and amplitude of each sensor determined from the data (min / max) and checked with the Lissajous plot"
 
   # ════════════════════════════════════════════════════════════════
   # 3. METHOD & SETUP  ·  6 pt  (1+2+1+1+1)
@@ -245,7 +246,7 @@ sections:
         max: 1
         step: 1
         points: 1
-        description: "The setup is described: physical aspects (the wheel with its number of magnets and their spacing, the distance between magnets and sensors, how the wheel is turned, where the potentiometer sits), location of the used components on the shield, and the setting of the experiment (room, temperature, at a desk)."
+        description: "The setup is described: physical aspects (the wheel with its number of magnets and their spacing, the distance between magnets and sensors, how the wheel is turned, where the potentiometer sits), location of the used components on the shield, and the setting of the experiment. Strict reading: the room temperature has to be mentioned (a value or explicitly room temperature, with the place); a desk or table without temperature earns 0."
 
       - id: me_setup_obs
         label: "observations"
@@ -255,11 +256,11 @@ sections:
           - "no physical description (wheel, magnets, air gap, how it is rotated)"
           - "shield drawing missing, generic, or used parts not marked"
           - "number of magnets, spacing or air gap not stated"
-          - "experiment conditions (room, temperature, desk) not mentioned"
+          - "experiment conditions (room temperature and place) not mentioned; a desk without temperature is not enough"
           - "no photo or sketch of the wheel and the magnet placement"
         positive:
           - "annotated shield drawing marking the Hall sensors and the potentiometer"
-          - "wheel drawing or photo with the number of magnets, spacing (33.75 degrees for 9 magnets over 270 degrees) and air gap"
+          - "wheel drawing or photo with the number of magnets, spacing (33.75 degrees pitch for 9 magnets over 270 degrees) and air gap"
           - "conditions stated (room, approximate temperature, table)"
           - "how the wheel was turned (by hand, slowly) described"
 
@@ -270,7 +271,7 @@ sections:
         max: 2
         step: 1
         points: 2
-        description: "The code used for the experiment is described and given. Concise, cleaned-up and minimal; copy-pasting from the reader is not the way to go. The code outputs the computed angle and the reference angle."
+        description: "The code used for the experiment is described and given. Concise, cleaned-up and minimal; copy-pasting from the reader is not the way to go. The code outputs the computed angle and the reference angle. Strict reading: 2 points need floats throughout, text and code in agreement, and constants traceable to data; an angle stored as int (truncation to whole degrees, which then propagates into the reported resolution), or a mismatch between text and code, caps the score at 1."
 
       - id: me_code_obs
         label: "observations"
@@ -280,9 +281,10 @@ sections:
           - "code copied from the reader or wiki without cleaning"
           - "long listing with unused parts or no comments"
           - "constants or formulas in the code do not match the text (offset, scaling 270/1440, atan2 argument order)"
-          - "code for the angle or for the reference conversion missing"
+          - "code for the angle or for the reference conversion missing (a conversion done in a spreadsheet is accepted when the formula and constants are stated explicitly, but belongs in the code eventually)"
           - "no unwrapping (transition counting) in the code"
           - "listing formatted poorly (large white space, unreadable)"
+          - "angle stored as int (truncation to whole degrees), which propagates into the reported resolution"
         positive:
           - "short listing covering both conversions (Hall angle and potentiometer angle per line)"
           - "unwrapping and scaling visible and matching the text"
@@ -308,7 +310,7 @@ sections:
           - "potentiometer range taken from the datasheet without checking it against the wheel range"
           - "'calibrated' claimed without any data"
         positive:
-          - "potentiometer conversion with the effective angle from the datasheet"
+          - "potentiometer conversion with the angle range from the datasheet (280 degrees mechanical, or the electrical range if recognised)"
           - "alignment (offset and scale) of the reference and the sensor angle determined from the data"
           - "accuracy or resolution of the reference mentioned (0.25 degrees per count, linearity)"
 
@@ -501,7 +503,7 @@ sections:
         max: 1
         step: 1
         points: 1
-        description: "A meaningful and quantified notion of accuracy, linked to the angular range of the sensor. The accuracy of the reference is discussed too. The mean and standard deviation of the error tell only part of the story: look for the worst-case error, and the error in the middle of the range versus the edges."
+        description: "A meaningful and quantified notion of accuracy, linked to the angular range of the sensor. The accuracy of the reference is discussed too. The mean and standard deviation of the error tell only part of the story: look for the worst-case error, and the error in the middle of the range versus the edges. Strict reading: the point needs the RMS or worst-case error in degrees plus at least one of a percentage of the range or a (quantitative) remark on the accuracy of the reference; both missing earns 0."
 
       - id: co_accuracy_obs
         label: "observations"
@@ -514,7 +516,7 @@ sections:
           - "edge errors (outside the valid reference range) included without comment"
         positive:
           - "worst-case or RMS error in degrees and as percentage of the range"
-          - "accuracy of the reference discussed (potentiometer linearity, 0.25 degrees per count)"
+          - "accuracy of the reference discussed (potentiometer linearity: the datasheet only guarantees 40-60 % at mid travel; about 0.25 degrees per count)"
           - "range over which the number holds is stated"
           - "error without the edge region also given"
 
@@ -525,7 +527,7 @@ sections:
         max: 1
         step: 1
         points: 1
-        description: "A meaningful, quantified notion of resolution, for both the reference and the sensor signal. Pay attention to the voltage range that the Hall sensors actually use. Reference: potentiometer 252 / 1023 = 0.25 degrees per count; Hall signals: a swing of about 245 counts (a quarter of the ADC range); a single-signal estimate gives 270 / 960 = 0.28 degrees; with two signals and atan2 the electrical resolution is about 1 / A radians (A = amplitude in counts, about 120), which is about 0.1 mechanical degrees."
+        description: "A meaningful, quantified notion of resolution, for both the reference and the sensor signal. Pay attention to the voltage range that the Hall sensors actually use. Reference: potentiometer 225 to 280 degrees / 1023 = 0.22 to 0.27 degrees per count (electrical or mechanical range); Hall signals: a swing of about 245 counts (a quarter of the ADC range); a single-signal estimate gives 270 / 960 = 0.28 degrees; with two signals and atan2 the electrical resolution is about 1 / A radians (A = amplitude in counts, about 120), which is about 0.1 mechanical degrees. A value that is an artefact of integer truncation or of print rounding (1 degree, 0.1 or 0.01 degrees) is not a resolution and earns 0."
 
       - id: co_resolution_obs
         label: "observations"
@@ -550,7 +552,7 @@ sections:
         max: 1
         step: 1
         points: 1
-        description: "Precision can be calculated from multiple measurements of the same thing (the same angle), giving a (standard) deviation. The standard deviation of the error is related, but repeated readings at fixed angles, or the sorted data at a number of angles, is better."
+        description: "Precision can be calculated from multiple measurements of the same thing (the same angle), giving a (standard) deviation. The standard deviation of the error is related, but repeated readings at fixed angles, or the sorted data at a number of angles, is better. Strict reading: precision needs holds, or turning to a certain position and returning to it repeatedly; the spread of the error over a sweep, or the repeatability of repeated sweeps, is not precision and earns 0 unless a hold is analysed."
 
       - id: co_precision_obs
         label: "observations"
@@ -572,7 +574,7 @@ sections:
         max: 1
         step: 1
         points: 1
-        description: "The relevant input and output ranges are stated in meaningful units: the angular range of the sensor (270 degrees in the reference, with number of magnets and transitions), the range of the reference, and the output voltage range of the Hall sensors. If the behaviour is only valid in a certain range, this is mentioned."
+        description: "The relevant input and output ranges are stated in meaningful units: the angular range of the sensor (270 to 280 degrees, with number of magnets and transitions), the range of the reference, and the output voltage range of the Hall sensors. If the behaviour is only valid in a certain range, this is mentioned. Strict reading: the electrical range of the reference (smaller than its mechanical travel) has to be stated for the point; the mechanical 280 degrees alone is not enough."
 
       - id: co_range_obs
         label: "observations"
@@ -585,9 +587,9 @@ sections:
           - "voltage range of the Hall sensors (used part of 0-5 V) not stated"
         positive:
           - "total angular range in degrees, with number of magnets and transitions"
-          - "range per transition (67.5 mechanical degrees for 9 magnets) mentioned"
+          - "range per transition (67.5 degrees for the 33.75 degree pitch) mentioned"
           - "output swing of the Hall sensors in V and in counts"
-          - "reference range (252 degrees electrical) compared with the wheel range (270 degrees)"
+          - "reference range (electrical range smaller than the 280 degrees mechanical travel) compared with the wheel range"
           - "limit of the tracking mentioned (count lost when turned too fast or after a power cycle)"
 
       - id: co_nonlin
@@ -609,9 +611,9 @@ sections:
           - "edge errors attributed to the sensor without checking the range of the reference"
           - "no comparison with an expectation (theory or datasheet)"
         positive:
-          - "error pattern per magnet transition quantified (peak-to-peak in degrees, period 67.5 degrees)"
+          - "error pattern per magnet transition quantified (peak-to-peak in degrees, period of one wave or half a wave)"
           - "cause identified from the Lissajous plot (offset, unequal amplitude, phase error)"
-          - "edge effect explained by the reference (252 versus 270 degrees)"
+          - "edge effect explained by the reference (flat output at both ends of the potentiometer travel)"
           - "compared with the datasheet (sensitivity tolerance, quiescent output error)"
 
       - id: co_improve
@@ -651,7 +653,7 @@ sections:
         max: 2
         step: 1
         points: 2
-        description: "The template has been followed and used correctly: font, layout, figure numbering, references. No major blank sections or badly copy-pasted resources. No huge white spaces in blocks of code."
+        description: "The template has been followed and used correctly: font, layout, figure numbering, references. No major blank sections or badly copy-pasted resources. No huge white spaces in blocks of code. A different page header or title is only a small remark."
 
       - id: fo_template_obs
         label: "observations"
