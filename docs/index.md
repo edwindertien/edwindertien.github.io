@@ -23,7 +23,7 @@ and documented well enough to rebuild: firmware, wiring, and the notes behind th
 <img src="projects/picotonewheel/docs/organ.jpg" alt="The Pico tonewheel organ sound module" loading="lazy">
 <span class="project-card__body">
 <strong>Pico Tonewheel Organ</strong>
-<span>A Hammond-style organ sound module on a Raspberry Pi Pico 2: nine drawbars, percussion, overdrive, vibrato, chorus and a stereo Leslie simulation. Plays from its own keyboard, USB MIDI or a computer.</span>
+<span>A Hammond-style organ sound module on a Raspberry Pi Pico 2: nine drawbars, percussion, overdrive, vibrato, chorus and a stereo Leslie simulation. Plays from its own keyboard, USB MIDI or a computer. The organ's keyboard unit is documented separately. </span>
 </span>
 </a>
 <a class="project-card" href="projects/picoLoraSEN66/">
@@ -35,6 +35,6 @@ and documented well enough to rebuild: firmware, wiring, and the notes behind th
 </a>
 </div>
 
-The organ's keyboard unit is documented separately: [Tonewheel Organ Keyboard](projects/picomidikeyboard/index.md).
+
 All projects are listed under [Projects](projects/index.md); the source of everything is on
 [GitHub](https://github.com/edwindertien).

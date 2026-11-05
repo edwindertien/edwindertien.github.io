@@ -16,6 +16,9 @@ nav = [
     { "Pico Tonewheel Organ" = ["projects/picotonewheel/index.md", { "Developer notes" = "projects/picotonewheel/context.md" }] },
     { "Tonewheel Organ Keyboard" = ["projects/picomidikeyboard/index.md", { "Developer notes" = "projects/picomidikeyboard/context.md" }] },
     { "SEN66 Environmental Monitor" = ["projects/picoLoraSEN66/index.md", { "Developer notes" = "projects/picoLoraSEN66/context.md" }] },
+    { "3D Footprint Generator" = ["projects/footprint3d/index.md"] },
+    { "universal streaming library for sensors" = ["projects/sensorproto/index.md"] },
+    { "interface for HID devices to MIDI" = ["projects/usb2midi/index.md"] },
   ] },
   # END GENERATED NAV
 ]
