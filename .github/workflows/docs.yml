@@ -33,10 +33,12 @@ jobs:
       - run: pip install -r requirements.txt
       - run: python scripts/sync_projects.py
       - run: zensical build --clean
-      - name: Add the static tools (served as they are, outside the generated site)
+      - name: Add static folders (optional, only those that exist)
+        env:
+          STATIC_DIRS: ""          # space-separated top-level folders to publish as they are
         run: |
-          for dir in education; do   # add more folders here if needed
-            cp -r "$dir" site/
+          for dir in $STATIC_DIRS; do
+            if [ -d "$dir" ]; then cp -r "$dir" site/; fi
           done
       - uses: actions/upload-pages-artifact@v5
         with:
