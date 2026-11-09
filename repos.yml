@@ -57,6 +57,21 @@ projects:
     image: resources/spacemouse.jpg
     status: working
 
+  - repo: supersocotc
+    title: installing a different motorcontroller on a supersoco scooter
+    summary: >-
+      Firmware for a Raspberry Pi PicoW to convert Fardriver's serial (bluetooth) messages to supersoco's RS485 protocol, including a mobile dashboard for checking temperatures and power.
+    image: docs/dashboard_mobile.png
+    status: working
+
+   - repo: picosynth
+    title: polyphonic synthesizer on a Raspberry Pi Pico
+    summary: >-
+      Software for a polyphonic substractive synthesiszer on a Pico2, controlled by an AKAI MPK mini keyboard. 
+    image: docs/fullsetup.jpg
+    status: working 
+
+
 # Other repositories, add them above when they are ready to be shown:
 #   InteractiveAudioplayer, NEN3140, animatronics, attinyleslieswitch, cosmicdune,
 #   eyeinthesky, ezgobridge, fabcam, fablab-dashboard, footprint3d, foundscape,
