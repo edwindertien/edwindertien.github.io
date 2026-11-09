@@ -72,7 +72,7 @@ projects:
     status: working 
 
   - repo: st3215andDXLservoMIDI
-    title: Universal bus servo configurator for DXL and ST3215 servos
+    title: Bus servo configurator for DXL and ST3215 servos
     summary: >-
       Pico based setup for controlling and configuring DXL1, DXL2.0, ST3215, SCS09 and other servos. 
     image: images/system.jpg
