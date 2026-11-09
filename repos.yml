@@ -21,7 +21,7 @@ projects:
     status: working
 
   - repo: picomidikeyboard
-    title: Tonewheel Organ Keyboard
+    title: MIDI keyboard for tonewheel organ
     summary: >-
       The keyboard unit for the tonewheel organ: a Pico scanning a 12x8x2 contact matrix
       and 16 drawbar/control pots, sending USB and DIN MIDI.
@@ -29,7 +29,7 @@ projects:
     status: working
 
   - repo: picoLoraSEN66
-    title: SEN66 Environmental Monitor
+    title: SEN66 Environmental Monitor 
     summary: >-
       CO2, VOC, NOx, particulates, temperature and humidity on a Pico W, with a web
       dashboard, an LCD menu and LoRa telemetry.
@@ -37,41 +37,46 @@ projects:
     status: working
 
   - repo: footprint3d
-    title: 3D Footprint Generator
+    title: 3D pawprint model generator
     summary: >-
       A python tool taking a 2D image of an animal footprint and generating a 3D model for 3D printing, using OpenCV and OpenSCAD.
     image: images/footprint.jpg
     status: working
 
   - repo: sensorproto
-    title: universal streaming library for sensors
+    title: Universal streaming library for sensors
     summary: >-
       A library for streaming data from sensors to a web dashboard or python sketch, with support for multiple protocols and formats. Included mostly sensors connected to Arduino, but also kinect and lidar.
     image: docs/dashboard_demo.png
     status: working
 
   - repo: usb2midi
-    title: interface for HID devices to MIDI
+    title: Interface for HID devices to MIDI
     summary: >-
       Firmware for a Raspberry Pi Pico (waveshare board)that converts USB HID devices (like keyboards, mice and gamepads) to MIDI messages, with support for multiple protocols and formats.
     image: resources/spacemouse.jpg
     status: working
 
   - repo: supersocotc
-    title: installing a different motorcontroller on a supersoco scooter
+    title: Supersoco RS485 interface for Fardriver
     summary: >-
       Firmware for a Raspberry Pi PicoW to convert Fardriver's serial (bluetooth) messages to supersoco's RS485 protocol, including a mobile dashboard for checking temperatures and power.
     image: docs/dashboard_mobile.png
     status: working
 
   - repo: picosynth
-    title: polyphonic synthesizer on a Raspberry Pi Pico
+    title: Polyphonic substractive synthesizer
     summary: >-
       Software for a polyphonic substractive synthesiszer on a Pico2, controlled by an AKAI MPK mini keyboard. 
     image: docs/fullsetup.jpg
     status: working 
 
-
+  - repo: st3215andDXLservoMIDI
+    title: Universal bus servo configurator for DXL and ST3215 servos
+    summary: >-
+      Pico based setup for controlling and configuring DXL1, DXL2.0, ST3215, SCS09 and other servos. 
+    image: images/system.jpg
+    status: working 
 # Other repositories, add them above when they are ready to be shown:
 #   InteractiveAudioplayer, NEN3140, animatronics, attinyleslieswitch, cosmicdune,
 #   eyeinthesky, ezgobridge, fabcam, fablab-dashboard, footprint3d, foundscape,
