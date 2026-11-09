@@ -62,7 +62,7 @@ projects:
     summary: >-
       Firmware for a Raspberry Pi PicoW to convert Fardriver's serial (bluetooth) messages to supersoco's RS485 protocol, including a mobile dashboard for checking temperatures and power.
     image: docs/dashboard_mobile.png
-    status: working
+    status: bench-tested
 
   - repo: picosynth
     title: Polyphonic substractive synthesizer
@@ -77,6 +77,7 @@ projects:
       Pico based setup for controlling and configuring DXL1, DXL2.0, ST3215, SCS09 and other servos. 
     image: images/system.jpg
     status: working 
+
 # Other repositories, add them above when they are ready to be shown:
 #   InteractiveAudioplayer, NEN3140, animatronics, attinyleslieswitch, cosmicdune,
 #   eyeinthesky, ezgobridge, fabcam, fablab-dashboard, footprint3d, foundscape,
