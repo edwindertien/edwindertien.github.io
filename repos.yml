@@ -64,7 +64,7 @@ projects:
     image: docs/dashboard_mobile.png
     status: working
 
-   - repo: picosynth
+  - repo: picosynth
     title: polyphonic synthesizer on a Raspberry Pi Pico
     summary: >-
       Software for a polyphonic substractive synthesiszer on a Pico2, controlled by an AKAI MPK mini keyboard. 
